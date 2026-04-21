@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Entrenador Garmin</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Reset & variables ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0f172a;
+      --surface:    #1e293b;
+      --surface2:   #263347;
+      --border:     #334155;
+      --primary:    #f97316;
+      --primary-d:  #ea6a05;
+      --green:      #22c55e;
+      --yellow:     #eab308;
+      --red:        #ef4444;
+      --blue:       #38bdf8;
+      --purple:     #a78bfa;
+      --text:       #f1f5f9;
+      --muted:      #94a3b8;
+      --radius:     14px;
+      --radius-sm:  8px;
+      --nav-h:      64px;
+      --header-h:   58px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      height: 100%;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────── */
+    #app-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      z-index: 100;
+    }
+
+    #app-header .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    #app-header .logo-icon {
+      width: 30px; height: 30px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    #app-header .header-date {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── Main content ──────────────────────────────────────────────────── */
+    #app-content {
+      margin-top: var(--header-h);
+      padding-bottom: calc(var(--nav-h) + 12px);
+      min-height: calc(100vh - var(--header-h));
+    }
+
+    .tab-panel {
+      display: none;
+      padding: 16px;
+      animation: fadeIn 0.18s ease;
+    }
+    .tab-panel.active { display: block; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
+
+    /* ── Bottom navigation ──────────────────────────────────────────────── */
+    #bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s;
+      padding: 8px 0;
+      letter-spacing: 0.3px;
+    }
+    .nav-btn .nav-icon { font-size: 21px; line-height: 1; }
+    .nav-btn.active { color: var(--primary); }
+
+    /* ── Cards ──────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 14px 14px 12px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-card .mc-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-card .mc-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .metric-card .mc-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+    }
+
+    .metric-card .mc-value {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1;
+      margin-top: 4px;
+      letter-spacing: -0.5px;
+    }
+
+    .metric-card .mc-unit {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+
+    .metric-card .mc-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* wide card: spans full width */
+    .metric-card.wide {
+      grid-column: 1 / -1;
+    }
+
+    /* ── Quick stats bar ────────────────────────────────────────────────── */
+    #quick-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .qs-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 6px;
+      text-align: center;
+    }
+
+    .qs-item .qs-val {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .qs-item .qs-lbl {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* ── Progress bar ───────────────────────────────────────────────────── */
+    .prog-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .prog-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+
+    /* ── Sleep breakdown ────────────────────────────────────────────────── */
+    .sleep-stages {
+      display: flex;
+      gap: 0;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .sleep-stages .stage { height: 100%; }
+
+    .sleep-legend {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sleep-legend .leg-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .sleep-legend .leg-dot {
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ── Section title ──────────────────────────────────────────────────── */
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin: 18px 0 10px;
+    }
+
+    /* ── Activity list ──────────────────────────────────────────────────── */
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+
+    .act-type-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .act-running  { background: rgba(34,197,94,.15); }
+    .act-cycling  { background: rgba(56,189,248,.15); }
+    .act-swimming { background: rgba(167,139,250,.15); }
+    .act-other    { background: rgba(249,115,22,.15); }
+
+    .act-info { flex: 1; min-width: 0; }
+    .act-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .act-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .act-stats { text-align: right; flex-shrink: 0; }
+    .act-dist  { font-size: 15px; font-weight: 700; }
+    .act-time  { font-size: 11px; color: var(--muted); }
+
+    /* ── Chart wrapper ──────────────────────────────────────────────────── */
+    .chart-wrap {
+      position: relative;
+      height: 180px;
+      margin-top: 8px;
+    }
+
+    /* ── Coach tab ──────────────────────────────────────────────────────── */
+    #readiness-circle-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0 10px;
+    }
+
+    .readiness-svg { width: 140px; height: 140px; }
+    .readiness-track { fill: none; stroke: var(--border); stroke-width: 10; }
+    .readiness-arc   { fill: none; stroke-width: 10; stroke-linecap: round;
+                       transform: rotate(-90deg); transform-origin: 50% 50%;
+                       transition: stroke-dasharray 0.8s ease, stroke 0.5s ease; }
+
+    .readiness-num {
+      font-size: 36px;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .readiness-label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .rec-badge {
+      display: inline-block;
+      padding: 5px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+    }
+    .rec-FUERTE   { background: rgba(34,197,94,.18);  color: var(--green); }
+    .rec-SUAVE    { background: rgba(234,179,8,.18);  color: var(--yellow); }
+    .rec-DESCANSO { background: rgba(239,68,68,.18);  color: var(--red); }
+
+    .phase-chip {
+      background: rgba(249,115,22,.12);
+      color: var(--primary);
+      border: 1px solid rgba(249,115,22,.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 14px;
+    }
+
+    .workout-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .workout-card .wk-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .workout-card .wk-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .workout-card .wk-meta { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+
+    .wk-pill {
+      background: var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .workout-card .wk-notes {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--yellow);
+      line-height: 1.4;
+    }
+
+    .alert-item {
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.2);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 7px;
+      line-height: 1.4;
+    }
+
+    .insight-item {
+      background: rgba(34,197,94,.07);
+      border: 1px solid rgba(34,197,94,.15);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 7px;
+      line-height: 1.4;
+    }
+
+    /* ── Sync tab ───────────────────────────────────────────────────────── */
+    #sync-btn-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 0 20px;
+      gap: 14px;
+    }
+
+    #sync-btn {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-d));
+      color: #fff;
+      font-size: 36px;
+      cursor: pointer;
+      box-shadow: 0 4px 24px rgba(249,115,22,.4);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    #sync-btn:active { transform: scale(0.94); }
+    #sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #sync-btn.spinning { animation: spin 1.2s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #sync-status-text {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* total progress bar */
+    #sync-progress-bar-wrap {
+      width: 100%;
+      display: none;
+    }
+
+    #sync-progress-bar-wrap.visible { display: block; }
+
+    #sync-progress-pct {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: right;
+      margin-bottom: 4px;
+    }
+
+    /* step list */
+    #sync-steps {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 4px;
+    }
+
+    .sync-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .sync-step .ss-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+    .sync-step.ss-done   { border-color: rgba(34,197,94,.25); }
+    .sync-step.ss-active { border-color: rgba(249,115,22,.35); background: rgba(249,115,22,.05); }
+    .sync-step.ss-error  { border-color: rgba(239,68,68,.25); }
+    .sync-step.ss-warn   { border-color: rgba(234,179,8,.25); }
+
+    #last-sync-info {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ── Utilities ──────────────────────────────────────────────────────── */
+    .mt8  { margin-top:  8px; }
+    .mt12 { margin-top: 12px; }
+    .mt16 { margin-top: 16px; }
+
+    .text-green  { color: var(--green); }
+    .text-yellow { color: var(--yellow); }
+    .text-red    { color: var(--red); }
+    .text-blue   { color: var(--blue); }
+    .text-purple { color: var(--purple); }
+    .text-orange { color: var(--primary); }
+    .text-muted  { color: var(--muted); }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 20px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .empty-state .es-icon { font-size: 40px; display: block; margin-bottom: 10px; }
+
+    /* ── No-data skeleton pulse ─────────────────────────────────────────── */
+    .skeleton {
+      background: var(--surface2);
+      border-radius: 6px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.45; } }
+  </style>
+</head>
+<body>
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════════════ -->
+  <header id="app-header">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      Entrenador
+    </div>
+    <span id="header-date" class="header-date"></span>
+  </header>
+
+  <!-- ══ CONTENT ═════════════════════════════════════════════════════════ -->
+  <main id="app-content">
+
+    <!-- ── TAB: HOY ─────────────────────────────────────────────────── -->
+    <div id="tab-today" class="tab-panel active">
+
+      <!-- Quick stats bar -->
+      <div id="quick-stats">
+        <div class="qs-item">
+          <div class="qs-val text-green" id="qs-steps">—</div>
+          <div class="qs-lbl">Pasos</div>
+        </div>
+        <div class="qs-item">
+          <div class="qs-val text-blue" id="qs-sleep">—</div>
+          <div class="qs-lbl">Sueño</div>
+        </div>
+        <div class="qs-item">
+          <div class="qs-val text-purple" id="qs-hrv">—</div>
+          <div class="qs-lbl">HRV</div>
+        </div>
+        <div class="qs-item">
+          <div class="qs-val text-yellow" id="qs-stress">—</div>
+          <div class="qs-lbl">Estrés</div>
+        </div>
+      </div>
+
+      <!-- Metric cards grid -->
+      <div class="card-grid">
+
+        <!-- Sueño (wide) -->
+        <div class="metric-card wide">
+          <div class="mc-header">
+            <span class="mc-icon">💤</span>
+            <span class="mc-label">Sueño</span>
+          </div>
+          <div style="display:flex; align-items:baseline; gap:10px; margin-top:6px; flex-wrap:wrap;">
+            <span class="mc-value text-blue" id="sleep-hours">—</span>
+            <span style="font-size:13px; color:var(--muted);">Score: <strong id="sleep-score" class="text-blue">—</strong>/100</span>
+          </div>
+          <div class="sleep-stages" id="sleep-stages">
+            <div class="stage" id="st-deep"   style="background:#6366f1;" title="Profundo"></div>
+            <div class="stage" id="st-light"  style="background:#38bdf8;" title="Ligero"></div>
+            <div class="stage" id="st-rem"    style="background:#a78bfa;" title="REM"></div>
+            <div class="stage" id="st-awake"  style="background:#334155;" title="Despierto"></div>
+          </div>
+          <div class="sleep-legend">
+            <div class="leg-item"><div class="leg-dot" style="background:#6366f1;"></div>Prof.</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#38bdf8;"></div>Ligero</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#a78bfa;"></div>REM</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#334155;"></div>Despierto</div>
+          </div>
+        </div>
+
+        <!-- HRV -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">💜</span>
+            <span class="mc-label">HRV</span>
+          </div>
+          <div class="mc-value text-purple" id="hrv-val">—<span class="mc-unit">ms</span></div>
+          <div class="mc-sub">Semanal: <span id="hrv-weekly">—</span> ms</div>
+        </div>
+
+        <!-- FC Reposo -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">❤️</span>
+            <span class="mc-label">FC Reposo</span>
+          </div>
+          <div class="mc-value text-red" id="rhr-val">—<span class="mc-unit">bpm</span></div>
+          <div class="mc-sub" id="rhr-sub">&nbsp;</div>
+        </div>
+
+        <!-- Estrés -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">🧠</span>
+            <span class="mc-label">Estrés</span>
+          </div>
+          <div class="mc-value text-yellow" id="stress-val">—</div>
+          <div class="mc-sub">Máx: <span id="stress-max">—</span></div>
+        </div>
+
+        <!-- Body battery -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">🔋</span>
+            <span class="mc-label">Body Battery</span>
+          </div>
+          <div class="mc-value text-green" id="bb-high">—</div>
+          <div class="mc-sub">Mín: <span id="bb-low">—</span></div>
+        </div>
+
+        <!-- Pasos -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">👟</span>
+            <span class="mc-label">Pasos</span>
+          </div>
+          <div class="mc-value text-green" id="steps-val">—</div>
+          <div class="mc-sub" id="steps-goal-sub">&nbsp;</div>
+          <div class="prog-bar mt8">
+            <div class="prog-bar-fill" id="steps-bar" style="background:var(--green); width:0%;"></div>
+          </div>
+        </div>
+
+        <!-- Calorías -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">🔥</span>
+            <span class="mc-label">Calorías</span>
+          </div>
+          <div class="mc-value text-orange" id="cal-val">—<span class="mc-unit">kcal</span></div>
+          <div class="mc-sub">Activas: <span id="cal-active">—</span></div>
+        </div>
+
+        <!-- SpO2 -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">🫁</span>
+            <span class="mc-label">SpO2</span>
+          </div>
+          <div class="mc-value text-blue" id="spo2-val">—<span class="mc-unit">%</span></div>
+          <div class="mc-sub">Mín: <span id="spo2-min">—</span>%</div>
+        </div>
+
+        <!-- Respiración -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">🌬️</span>
+            <span class="mc-label">Respiración</span>
+          </div>
+          <div class="mc-value" id="resp-val">—<span class="mc-unit">rpm</span></div>
+          <div class="mc-sub">Rango: <span id="resp-range">—</span></div>
+        </div>
+
+        <!-- Hidratación (wide) -->
+        <div class="metric-card wide">
+          <div class="mc-header">
+            <span class="mc-icon">💧</span>
+            <span class="mc-label">Hidratación</span>
+          </div>
+          <div style="display:flex; align-items:baseline; gap:8px; margin-top:6px;">
+            <span class="mc-value text-blue" id="hydra-val">—<span class="mc-unit">ml</span></span>
+            <span style="font-size:13px; color:var(--muted);">/ <span id="hydra-goal">—</span> ml</span>
+          </div>
+          <div class="prog-bar mt8">
+            <div class="prog-bar-fill" id="hydra-bar" style="background:var(--blue); width:0%;"></div>
+          </div>
+        </div>
+
+        <!-- Peso -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">⚖️</span>
+            <span class="mc-label">Peso</span>
+          </div>
+          <div class="mc-value" id="weight-val">—<span class="mc-unit">kg</span></div>
+          <div class="mc-sub">Grasa: <span id="fat-val">—</span>%</div>
+        </div>
+
+        <!-- Pisos -->
+        <div class="metric-card">
+          <div class="mc-header">
+            <span class="mc-icon">🏢</span>
+            <span class="mc-label">Pisos</span>
+          </div>
+          <div class="mc-value text-green" id="floors-val">—</div>
+          <div class="mc-sub">subidos hoy</div>
+        </div>
+
+      </div><!-- /card-grid -->
+
+      <!-- HRV trend mini chart -->
+      <p class="section-title mt16">HRV — últimos 7 días</p>
+      <div class="card">
+        <div class="chart-wrap">
+          <canvas id="hrv-chart"></canvas>
+        </div>
+      </div>
+
+    </div><!-- /tab-today -->
+
+    <!-- ── TAB: ENTRENOS ─────────────────────────────────────────────── -->
+    <div id="tab-activities" class="tab-panel">
+
+      <p class="section-title">Volumen semanal (km)</p>
+      <div class="card">
+        <div class="chart-wrap">
+          <canvas id="volume-chart"></canvas>
+        </div>
+      </div>
+
+      <p class="section-title mt16">Últimas actividades</p>
+      <div id="activity-list">
+        <div class="empty-state">
+          <span class="es-icon">🏃</span>
+          Sincronizá para ver tus actividades
+        </div>
+      </div>
+
+    </div><!-- /tab-activities -->
+
+    <!-- ── TAB: ENTRENADOR ───────────────────────────────────────────── -->
+    <div id="tab-coach" class="tab-panel">
+
+      <div id="readiness-circle-wrap">
+        <span id="phase-chip" class="phase-chip">Cargando...</span>
+
+        <svg class="readiness-svg" viewBox="0 0 100 100">
+          <circle class="readiness-track" cx="50" cy="50" r="42"/>
+          <circle class="readiness-arc" id="readiness-arc" cx="50" cy="50" r="42"
+                  stroke="#22c55e" stroke-dasharray="0 264"/>
+          <text class="readiness-num" id="readiness-num" x="50" y="50" fill="#f1f5f9">—</text>
+        </svg>
+
+        <div class="readiness-label" id="readiness-label">Sincronizando datos...</div>
+        <span id="rec-badge" class="rec-badge">—</span>
+      </div>
+
+      <!-- Alerts -->
+      <div id="coach-alerts"></div>
+
+      <!-- Insights -->
+      <div id="coach-insights"></div>
+
+      <!-- Workout suggestion -->
+      <div id="workout-card-wrap"></div>
+
+      <!-- HRV trend for coach -->
+      <p class="section-title mt16">Tendencia HRV</p>
+      <div class="card">
+        <div class="chart-wrap">
+          <canvas id="hrv-chart-coach"></canvas>
+        </div>
+      </div>
+
+      <!-- Days to race -->
+      <div class="card mt12" id="race-countdown">
+        <div class="card-title">Próxima carrera</div>
+        <div style="font-size:22px; font-weight:800; color:var(--primary);" id="race-days">—</div>
+        <div style="font-size:13px; color:var(--muted); margin-top:4px;" id="race-name-lbl">—</div>
+      </div>
+
+    </div><!-- /tab-coach -->
+
+    <!-- ── TAB: SYNC ─────────────────────────────────────────────────── -->
+    <div id="tab-sync" class="tab-panel">
+
+      <div id="sync-btn-wrap">
+        <button id="sync-btn" aria-label="Sincronizar">🔄</button>
+        <div id="sync-status-text">Toca para sincronizar</div>
+        <div id="last-sync-info"></div>
+      </div>
+
+      <!-- Overall progress bar -->
+      <div id="sync-progress-bar-wrap">
+        <div id="sync-progress-pct">0%</div>
+        <div class="prog-bar" style="height:8px;">
+          <div class="prog-bar-fill" id="sync-bar-fill"
+               style="background:var(--primary); width:0%; transition:width 0.3s ease;"></div>
+        </div>
+      </div>
+
+      <!-- Step log -->
+      <div id="sync-steps" class="mt12"></div>
+
+    </div><!-- /tab-sync -->
+
+  </main><!-- /app-content -->
+
+  <!-- ══ BOTTOM NAV ══════════════════════════════════════════════════════ -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" data-tab="today">
+      <span class="nav-icon">🏠</span>Hoy
+    </button>
+    <button class="nav-btn" data-tab="activities">
+      <span class="nav-icon">📊</span>Entrenos
+    </button>
+    <button class="nav-btn" data-tab="coach">
+      <span class="nav-icon">🧠</span>Entrenador
+    </button>
+    <button class="nav-btn" data-tab="sync">
+      <span class="nav-icon">🔄</span>Sync
+    </button>
+  </nav>
+
+  <script src="/static/app.js"></script>
+
+</body>
+</html>
