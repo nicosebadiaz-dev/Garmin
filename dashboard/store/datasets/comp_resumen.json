@@ -1,0 +1,18 @@
+{
+  "description": "FC media y máxima y potencia del entrenamiento con el que comparas.",
+  "source": {
+    "args": {
+      "activity_id": "{{comparar}}"
+    },
+    "connector": "Strava",
+    "kind": "call",
+    "rules": {
+      "comparar": {
+        "description": "Cualquier actividad de tu Strava, por su número",
+        "pattern": "^[0-9]{1,20}$"
+      }
+    },
+    "tool": "get_activity_performance"
+  },
+  "title": "Entrenamiento comparado: resumen"
+}

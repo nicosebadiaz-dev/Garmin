@@ -1,0 +1,2158 @@
+<meta name="dash-one-writer">
+<style>
+.me { display: grid; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+.me h1, .me h2, .me h3, .me p { margin: 0; }
+.me-head { display: grid; gap: var(--cds-gap-sm); }
+.me-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); text-wrap: balance; }
+.me-lede { color: var(--color-fg-muted); max-width: 68ch; line-height: 1.5; }
+.me-lede b { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+.me-h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+.me-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.me-muted { color: var(--color-fg-muted); }
+.me-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; display: grid; gap: var(--cds-gap-md); align-content: start; }
+.me-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--cds-gap-md); }
+.me-kpi { gap: var(--cds-gap-xs); }
+.me-kpi-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: .05em; }
+.me-kpi-value { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 2.1rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.me-kpi-unit { font-size: var(--cds-font-size-body); color: var(--color-fg-muted); margin-left: 4px; font-family: var(--font-anthropic-sans); }
+.me-kpi-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.me-good { color: var(--color-ok); } .me-bad { color: var(--color-warn); }
+
+.me-calbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--cds-gap-sm); }
+.me-month { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-heading); text-transform: capitalize; }
+.me-nav { display: flex; gap: var(--cds-gap-xs); }
+.me-btn { font: inherit; font-size: var(--cds-font-size-caption); color: var(--color-fg); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: 6px 12px; cursor: pointer; }
+.me-btn:hover { border-color: var(--color-fg-muted); }
+.me-btn:focus-visible, .me-day:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 1px; }
+.me-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.me-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.me-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--cds-chart-muted); }
+
+.me-calwrap { container-type: inline-size; display: grid; gap: 4px; }
+.me-calhead, .me-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) 76px; gap: 4px; }
+.me-calhead span { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: .05em; padding: 0 4px; }
+.me-day { font: inherit; text-align: left; min-height: 88px; min-width: 0; background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: calc(var(--cds-radius) * .6); padding: 4px 5px; display: flex; flex-direction: column; gap: 3px; color: var(--color-fg); overflow: hidden; }
+.me-day:hover { border-color: var(--color-fg-muted); }
+.me-day.is-out { opacity: .38; }
+.me-day.is-today .me-dnum { background: var(--color-fg); color: var(--color-bg); }
+.me-day.is-sel { box-shadow: inset 0 0 0 2px var(--color-fg); }
+.me-dnum { font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; align-self: flex-start; padding: 0 5px; border-radius: 99px; line-height: 1.5; }
+.me-chip { display: flex; align-items: center; gap: 4px; font-size: 11px; line-height: 1.3; white-space: nowrap; min-width: 0; font-variant-numeric: tabular-nums; }
+.me-chip-t { overflow: hidden; text-overflow: ellipsis; }
+.me-dots { display: none; flex-wrap: wrap; gap: 3px; }
+.me-wk { min-width: 0; border-radius: calc(var(--cds-radius) * .6); background: var(--color-panel); border: 1px dashed var(--color-border-line); padding: 4px 6px; display: flex; flex-direction: column; justify-content: center; gap: 2px; font-size: 11px; color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.me-wk b { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-caption); }
+@container (max-width: 560px) {
+  .me-calhead, .me-cal { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+  .me-wk, .me-wk-h { display: none !important; }
+  .me-day { min-height: 54px; padding: 3px; }
+  .me-chip { display: none; }
+  .me-dots { display: flex; }
+}
+
+.me-detail { display: grid; gap: var(--cds-gap-sm); border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
+.me-dtitle { font-weight: var(--cds-font-weight-medium); text-transform: capitalize; }
+.me-acts { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--cds-gap-sm); }
+.me-act { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: baseline; }
+.me-act .me-dot { width: 10px; height: 10px; align-self: center; }
+.me-act-name { font-weight: var(--cds-font-weight-medium); min-width: 0; overflow-wrap: anywhere; }
+.me-act-name a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--color-border-line); }
+.me-act-name a:hover { border-bottom-color: var(--color-fg); }
+.me-act-meta { grid-column: 2; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+
+.me-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: var(--cds-gap-md); }
+.me-chart { position: relative; min-height: 230px; }
+.me-chart svg { display: block; overflow: visible; }
+.me-chart .tick text, .me-chart .me-axl { fill: var(--cds-text-secondary); font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); }
+.me-chart .tick line { stroke: var(--cds-chart-grid); }
+.me-chart .domain { stroke: var(--cds-chart-axis); }
+.me-chart .me-val { fill: var(--color-fg); font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); font-variant-numeric: tabular-nums; }
+.me-tip { position: absolute; pointer-events: none; z-index: 5; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); box-shadow: var(--cds-shadow-popover); border-radius: var(--cds-radius); padding: 6px 9px; font-size: var(--cds-font-size-caption); line-height: 1.45; white-space: nowrap; color: var(--color-fg); }
+.me-tip div + div { color: var(--cds-text-secondary); }
+.me-err { color: var(--color-bad); font-size: var(--cds-font-size-caption); }
+
+.me-tablewrap { overflow-x: auto; }
+.me-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.me-table th { text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: 6px 8px; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.me-table td { padding: 7px 8px; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.me-table td.me-wrap { white-space: normal; min-width: 140px; }
+.me-table .me-num { text-align: right; }
+.me-health { grid-template-columns: 1fr; }
+.me-health ul { margin: 0; padding-left: 1.2em; color: var(--color-fg-muted); line-height: 1.6; }
+.me-tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1px solid var(--color-border-line); scrollbar-width: none; }
+.me-tab { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg-muted); background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; cursor: pointer; white-space: nowrap; }
+.me-tab:hover { color: var(--color-fg); }
+.me-tab[aria-selected="true"] { color: var(--color-fg); border-bottom-color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+.me-tab:focus-visible { outline: 2px solid var(--color-fg); outline-offset: -2px; }
+.me-panel { display: grid; gap: var(--cds-gap-xl); }
+.me-row { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; }
+.me-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--color-border-line); background: var(--color-bg); font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.me-pill.is-warn { border-color: var(--color-warn); }
+.me-pill.is-bad { border-color: var(--color-bad); color: var(--color-bad); }
+.me-pill.is-ok { border-color: var(--color-ok); }
+.me-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; max-width: 72ch; }
+.me-note b { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+.me-state-ok { color: var(--color-ok); } .me-state-warn { color: var(--color-warn); } .me-state-bad { color: var(--color-bad); }
+
+.me-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: var(--cds-gap-sm); align-items: end; }
+.me-form label { display: grid; gap: 4px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); min-width: 0; }
+.me-form .me-wide { grid-column: 1 / -1; }
+.me-form input, .me-form select, .me-form textarea { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background-color: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: calc(var(--cds-radius) * .6); padding: 6px 8px; min-width: 0; width: 100%; box-sizing: border-box; }
+.me-form textarea { min-height: 60px; resize: vertical; }
+.me-form input:focus-visible, .me-form select:focus-visible, .me-form textarea:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 0; }
+.me-primary { font: inherit; font-size: var(--cds-font-size-body); background: var(--color-fg); color: var(--color-bg); border: 0; border-radius: calc(var(--cds-radius) * .6); padding: 8px 14px; cursor: pointer; }
+.me-primary:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+.me-msg { font-size: var(--cds-font-size-caption); }
+.me-msg.is-bad { color: var(--color-bad); } .me-msg.is-ok { color: var(--color-ok); }
+.me-formtitle { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); }
+.me-x { font: inherit; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); background: none; border: 1px solid var(--color-border-line); border-radius: 99px; padding: 1px 8px; cursor: pointer; }
+.me-x:hover { color: var(--color-bad); border-color: var(--color-bad); }
+
+.me-chip.is-plan { color: var(--color-fg-muted); }
+.me-ring { display: inline-block; width: 6px; height: 6px; border-radius: 50%; border: 1.5px solid var(--color-fg-muted); flex: none; }
+.me-ring.is-done { border-color: var(--color-ok); background: var(--color-ok); }
+.me-diary-mark { position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 1px; background: var(--color-fg-muted); }
+.me-day { position: relative; }
+
+.me-goals, .me-races, .me-shoes { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--cds-gap-md); }
+.me-goal { display: grid; gap: 6px; }
+.me-goal-top { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); align-items: baseline; flex-wrap: wrap; }
+.me-goal-name { font-weight: var(--cds-font-weight-medium); }
+.me-goal-num { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.me-bar { position: relative; height: 10px; border-radius: 99px; background: var(--color-bg); border: 1px solid var(--color-border-line); overflow: hidden; }
+.me-bar > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; }
+.me-bar > b { position: absolute; top: -1px; bottom: -1px; width: 2px; background: var(--color-fg); opacity: .6; }
+.me-race { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 14px; align-items: center; }
+.me-race-days { font-family: var(--font-anthropic-serif); font-size: 1.9rem; line-height: 1; font-variant-numeric: tabular-nums; text-align: center; min-width: 3ch; }
+.me-race-days small { display: block; font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.me-race-meta { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.me-empty { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.me-health-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--cds-gap-md); }
+.me-mini { position: relative; min-height: 120px; }
+.me-mini svg { display: block; overflow: visible; }
+.me-mini .tick text { fill: var(--cds-text-secondary); font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); }
+.me-mini .tick line { stroke: var(--cds-chart-grid); }
+.me-mini .domain { stroke: var(--cds-chart-axis); }
+.me-mini .me-val { fill: var(--color-fg); font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); }
+.me-ref { stroke: var(--cds-chart-reference); stroke-dasharray: 3 3; }
+@media print { .me-tabs { display: none; } .me-panel[hidden] { display: grid !important; } }
+.me-sesion-tit { display: grid; gap: 2px; min-width: 0; }
+.me-sesion-tit .me-month { text-transform: none; overflow-wrap: anywhere; }
+.me-pick { display: grid; gap: 4px; min-width: min(100%, 260px); }
+.me-pick select { width: 100%; }
+.me-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--cds-gap-md) var(--cds-gap-lg); }
+.me-stat { display: grid; gap: 2px; min-width: 0; }
+.me-stat-l { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: .05em; }
+.me-stat-v { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 1.45rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.me-reads { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--cds-gap-sm); }
+.me-read { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; line-height: 1.5; max-width: 80ch; }
+.me-read-mark { width: 8px; height: 8px; border-radius: 50%; background: var(--cds-chart-muted); transform: translateY(-1px); }
+.me-read.is-ok .me-read-mark { background: var(--color-ok); }
+.me-read.is-warn .me-read-mark { background: var(--color-warn); }
+.me-filter { display: inline-grid; gap: 4px; justify-self: start; }
+.me-stat-small { font-size: var(--cds-font-size-body); font-family: var(--font-anthropic-sans); line-height: 1.35; overflow-wrap: anywhere; }
+.me-heatwrap { overflow-x: auto; }
+.me-heat { position: relative; min-height: 120px; }
+.me-heat svg { display: block; }
+.me-heat text { fill: var(--cds-text-secondary); font-size: 10px; font-family: var(--font-anthropic-sans); }
+.me-hcell { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin: 0 1px; background: var(--color-bg); border: 1px solid var(--color-border-line); vertical-align: middle; }
+.me-add { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-sm); }
+.me-add > summary { cursor: pointer; font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); padding: 4px 0; }
+.me-add[open] > summary { margin-bottom: var(--cds-gap-sm); }
+.me-add > summary:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+.me-hcell-taper { border-color: var(--color-warn); border-style: dashed; }
+#prep-legend .me-hcell { border-style: dashed; }
+/* Celular primero */
+.me-kpis { grid-template-columns: repeat(auto-fit, minmax(min(150px, calc(50% - var(--cds-gap-md))), 1fr)); }
+@media (max-width: 520px) {
+  .me { gap: var(--cds-gap-lg); }
+  .me-card { padding: var(--cds-pad-md); }
+  .me-kpi-value { font-size: 1.7rem; }
+  .me-kpi-label { font-size: 11px; }
+  .me-tab { padding: 8px 10px; font-size: var(--cds-font-size-caption); }
+  .me-title { font-size: var(--cds-font-size-heading); }
+  .me-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .me-chart { min-height: 200px; }
+  .me-nav .me-btn { padding: 6px 9px; }
+}
+</style>
+
+<div class="me">
+  <header class="me-head" id="cabecera">
+    <h1 class="me-title">Mi Entrenamiento</h1>
+    <p class="me-lede" data-read lang="es">En los últimos 28 días corriste <b data-draw="t-km" data-source="kpis" data-field="km28" data-row="0">—</b> km en <b data-draw="t-runs" data-source="kpis" data-field="salidas28" data-row="0">—</b> salidas<span class="me-cmp">, un <b data-draw="t-pct" data-source="kpis" data-field="cambio_pct" data-row="0">—</b>% <span data-draw="t-dir">—</span> que en los 28 días anteriores</span>. Llevas <b data-draw="t-streak" data-source="streak" data-field="semanas" data-row="0">—</b> semanas seguidas entrenando.</p>
+    <label class="me-sub me-filter">Deporte
+      <select class="dash-select" id="f-deporte" aria-label="Filtrar por deporte"><option value="">Todos los deportes</option><option>Carrera</option><option>Ciclismo</option><option>Natación</option><option>Fuerza</option><option>Movilidad</option><option>Otros</option></select>
+    </label>
+  </header>
+
+  <nav class="me-tabs" role="tablist" aria-label="Secciones">
+    <button type="button" class="me-tab" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+    <button type="button" class="me-tab" role="tab" data-tab="calendario" aria-selected="false">Semana y mes</button>
+    <button type="button" class="me-tab" role="tab" data-tab="progreso" aria-selected="false">Progreso</button>
+    <button type="button" class="me-tab" role="tab" data-tab="sesion" aria-selected="false">Último entrenamiento</button>
+    <button type="button" class="me-tab" role="tab" data-tab="detalle" aria-selected="false">Detalle</button>
+  </nav>
+
+  <!-- ==================== RESUMEN ==================== -->
+  <section class="me-panel" id="resumen" role="tabpanel">
+    <div class="me-kpis" id="kpis">
+      <div class="me-card me-kpi" id="kpi-km">
+        <span class="me-kpi-label">Km corriendo · 28 días</span>
+        <span class="me-kpi-value"><span data-draw="k-km" data-source="kpis" data-field="km28" data-row="0" data-fetchpriority="high">—</span><span class="me-kpi-unit">km</span></span>
+        <span class="me-kpi-sub"><span data-draw="k-km-delta">—</span> vs. 28 días previos (<span data-draw="k-km-prev" data-source="kpis" data-field="km_prev" data-row="0">—</span> km)</span>
+      </div>
+      <div class="me-card me-kpi" id="kpi-eficiencia">
+        <span class="me-kpi-label">Eficiencia aeróbica · 4 semanas</span>
+        <span class="me-kpi-value"><span data-draw="k-eff" data-source="eficiencia_resumen" data-field="reciente" data-row="0">—</span><span class="me-kpi-unit">m/latido</span></span>
+        <span class="me-kpi-sub" data-draw="k-eff-delta">—</span>
+      </div>
+      <div class="me-card me-kpi" id="kpi-carrera">
+        <span class="me-kpi-label">Próxima carrera</span>
+        <span class="me-kpi-value"><span data-draw="k-race-days" data-source="carreras_cd" data-field="dias" data-row="0">—</span><span class="me-kpi-unit">días</span></span>
+        <span class="me-kpi-sub" data-draw="k-race-name">—</span>
+      </div>
+      <div class="me-card me-kpi" id="kpi-racha">
+        <span class="me-kpi-label">Racha semanal</span>
+        <span class="me-kpi-value"><span data-draw="k-streak" data-source="streak" data-field="semanas" data-row="0">—</span><span class="me-kpi-unit">semanas</span></span>
+        <span class="me-kpi-sub">Desde el <span data-draw="k-streak-since" data-source="streak" data-field="desde" data-row="0">—</span></span>
+      </div>
+    </div>
+
+    <div class="me-card" id="preparacion">
+      <div><h2 class="me-h2">Camino a tu próxima carrera</h2><p class="me-sub" data-draw="prep-sub">—</p></div>
+      <p class="me-empty" id="prep-empty" hidden>Anota tu próxima carrera en «Agregar una carrera» y aquí verás tu volumen semanal hasta esa fecha.</p>
+      <div class="me-legend" id="prep-legend"><span><i class="me-dot" data-series="0"></i>Km corridos</span><span><i class="me-hcell"></i>Semanas que faltan</span><span><i class="me-hcell me-hcell-taper"></i>Descarga (2 últimas semanas)</span></div>
+      <div class="me-chart" data-draw="chart-prep" data-source="carrera_prep"></div>
+      <p class="me-note">Lo habitual es subir el volumen poco a poco (no más de un 10 % por semana) y reducirlo un 30–50 % en las dos semanas previas a la carrera.</p>
+    </div>
+
+    <div class="me-grid2">
+      <div class="me-card" id="objetivos">
+        <div><h2 class="me-h2">Objetivos</h2><p class="me-sub">La línea vertical marca dónde deberías ir según los días que pasaron del periodo</p></div>
+        <p class="me-empty" id="goals-empty" hidden>Todavía no tienes objetivos. Crea el primero con el formulario de abajo.</p>
+        <ul class="me-goals" data-draw="goals" data-source="metas_progreso"></ul>
+        <details class="me-add"><summary>Agregar un objetivo</summary>
+          <form class="me-form" id="form-meta" autocomplete="off">
+          <label>Tipo<select id="f-meta-tipo"><option value="km_carrera">Km corriendo</option><option value="horas">Horas entrenando</option><option value="sesiones">Sesiones</option></select></label>
+          <label>Deporte (sesiones)<select id="f-meta-cat"><option value="">Todos</option><option>Carrera</option><option>Ciclismo</option><option>Natación</option><option>Fuerza</option><option>Movilidad</option></select></label>
+          <label>Periodo<select id="f-meta-per"><option value="semana">Por semana</option><option value="mes" selected>Por mes</option><option value="anio">Por año</option></select></label>
+          <label>Objetivo<input type="number" id="f-meta-obj" min="1" max="10000" step="1" required inputmode="numeric"></label>
+          <button type="submit" class="me-primary">Crear objetivo</button>
+        </form>
+        <p class="me-msg is-ok" data-msg="meta-ok" hidden>Objetivo creado.</p>
+        <p class="me-msg is-bad" data-msg="meta-bad" hidden>No se pudo guardar. Revisa tu conexión y vuelve a intentarlo.</p>
+        </details>
+      </div>
+      <div class="me-card" id="carreras">
+        <div><h2 class="me-h2">Próximas carreras</h2><p class="me-sub">Cuenta regresiva y tiempo estimado a partir de tus récords</p></div>
+        <p class="me-empty" id="races-empty" hidden>No tienes carreras anotadas. Agrega tu próxima carrera abajo.</p>
+        <ul class="me-races" data-draw="races" data-source="carreras_cd"></ul>
+        <details class="me-add"><summary>Agregar una carrera</summary>
+          <form class="me-form" id="form-carrera" autocomplete="off">
+          <label class="me-wide">Nombre<input type="text" id="f-car-nombre" maxlength="80" required placeholder="Ej.: Media Maratón de Montevideo"></label>
+          <label>Fecha<input type="date" id="f-car-fecha" min="2020-01-01" max="2035-12-31" required></label>
+          <label>Distancia (km)<input type="number" id="f-car-dist" min="0.4" max="250" step="0.001" required inputmode="decimal" placeholder="21.097"></label>
+          <label>Tiempo objetivo (opcional)<input type="text" id="f-car-obj" maxlength="8" pattern="^(\d{1,2}:)?\d{1,2}:\d{2}$" placeholder="1:59:00"></label>
+          <button type="submit" class="me-primary">Agregar carrera</button>
+        </form>
+        <p class="me-msg is-ok" data-msg="carrera-ok" hidden>Carrera agregada.</p>
+        <p class="me-msg is-bad" data-msg="carrera-bad" hidden>No se pudo guardar. Revisa la fecha y la distancia, y vuelve a intentarlo.</p>
+        </details>
+        <p class="me-note">El tiempo estimado aplica la fórmula de Riegel a tu récord de la distancia más cercana. Si ese récord es antiguo, la estimación puede ser optimista.</p>
+      </div>
+    </div>
+
+    <div class="me-card" id="semana">
+      <div><h2 class="me-h2">Esta semana frente a la anterior</h2><p class="me-sub">De lunes a hoy, comparado con la semana pasada completa</p></div>
+      <div class="me-stats">
+        <div class="me-stat"><span class="me-stat-l">Km corriendo</span><span class="me-stat-v"><span data-draw="w-km" data-source="semana_resumen" data-field="km" data-row="0">—</span><span class="me-kpi-unit">km</span></span><span class="me-kpi-sub">Semana pasada: <span data-draw="w-km-ant" data-source="semana_resumen" data-field="km_ant" data-row="0">—</span> km</span></div>
+        <div class="me-stat"><span class="me-stat-l">Horas</span><span class="me-stat-v"><span data-draw="w-h" data-source="semana_resumen" data-field="horas" data-row="0">—</span><span class="me-kpi-unit">h</span></span><span class="me-kpi-sub">Semana pasada: <span data-draw="w-h-ant" data-source="semana_resumen" data-field="horas_ant" data-row="0">—</span> h</span></div>
+        <div class="me-stat"><span class="me-stat-l">Sesiones</span><span class="me-stat-v"><span data-draw="w-s" data-source="semana_resumen" data-field="sesiones" data-row="0">—</span></span><span class="me-kpi-sub">Semana pasada: <span data-draw="w-s-ant" data-source="semana_resumen" data-field="sesiones_ant" data-row="0">—</span></span></div>
+        <div class="me-stat"><span class="me-stat-l">Sesión más dura</span><span class="me-stat-v me-stat-small" data-draw="w-dura" data-source="semana_resumen" data-field="dura_nombre" data-row="0">—</span><span class="me-kpi-sub">Esfuerzo relativo <span data-draw="w-dura-e" data-source="semana_resumen" data-field="dura_esfuerzo" data-row="0">—</span></span></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="constancia">
+      <div><h2 class="me-h2">Días desde la última sesión</h2><p class="me-sub">Amarillo a partir de 14 días, rojo a partir de 30</p></div>
+      <div class="me-row" data-draw="constancia" data-source="constancia"></div>
+    </div>
+  </section>
+
+  <!-- ==================== SEMANA Y MES ==================== -->
+  <section class="me-panel" id="calendario" role="tabpanel" hidden>
+    <div class="me-card" id="cal-card">
+      <div class="me-calbar">
+        <h2 class="me-month" data-draw="month-label">—</h2>
+        <div class="me-nav">
+          <button type="button" class="me-btn" data-cal-nav="-1" aria-label="Mes anterior">← Anterior</button>
+          <button type="button" class="me-btn" data-cal-nav="0">Hoy</button>
+          <button type="button" class="me-btn" data-cal-nav="1" aria-label="Mes siguiente">Siguiente →</button>
+        </div>
+      </div>
+      <div class="me-legend" aria-label="Deportes">
+        <span><i class="me-dot" data-cat="Carrera"></i>Carrera</span>
+        <span><i class="me-dot" data-cat="Ciclismo"></i>Ciclismo</span>
+        <span><i class="me-dot" data-cat="Natación"></i>Natación</span>
+        <span><i class="me-dot" data-cat="Fuerza"></i>Fuerza</span>
+        <span><i class="me-dot" data-cat="Movilidad"></i>Movilidad</span>
+        <span><i class="me-dot" data-cat="Otros"></i>Otros</span>
+      </div>
+      <div class="me-calwrap">
+        <div class="me-calhead" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span><span class="me-wk-h">Semana</span></div>
+        <div class="me-cal" data-draw="calendar" data-source="act_f" aria-label="Calendario de entrenamientos"></div>
+      </div>
+    </div>
+
+    <div class="me-grid2">
+      <div class="me-card" id="km-semana">
+        <div><h2 class="me-h2">Kilómetros de carrera por semana</h2><p class="me-sub">Últimas 16 semanas, de lunes a domingo</p></div>
+        <div class="me-chart" data-draw="chart-runkm" data-source="weekly"></div>
+      </div>
+      <div class="me-card" id="horas-semana">
+        <div><h2 class="me-h2">Horas por semana y deporte</h2><p class="me-sub">Últimas 16 semanas, tiempo en movimiento</p></div>
+        <div class="me-chart" data-draw="chart-hours" data-source="weekly"></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="anio">
+      <div><h2 class="me-h2">Tu año de entrenamiento</h2><p class="me-sub">Últimas 52 semanas · cada cuadro es un día, más oscuro cuantos más minutos entrenaste</p></div>
+      <div class="me-heatwrap"><div class="me-heat" data-draw="heatmap" data-source="dias_anio"></div></div>
+      <div class="me-legend"><span>Menos</span><span><i class="me-hcell" data-lvl="0"></i><i class="me-hcell" data-lvl="1"></i><i class="me-hcell" data-lvl="2"></i><i class="me-hcell" data-lvl="3"></i><i class="me-hcell" data-lvl="4"></i></span><span>Más</span></div>
+    </div>
+
+    <div class="me-card" id="recientes">
+      <div><h2 class="me-h2">Últimas actividades</h2><p class="me-sub">Las 12 más recientes</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="act_f" data-row-key="id">
+          <thead><tr><th data-field="day">Fecha</th><th data-field="name">Actividad</th><th data-field="distance_km" class="me-num">Km</th><th data-field="duracion" class="me-num">Tiempo</th><th data-field="pace" class="me-num">Ritmo</th></tr></thead>
+          <tbody data-draw="recent"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PROGRESO ==================== -->
+  <section class="me-panel" id="progreso" role="tabpanel" hidden>
+    <div class="me-card" id="eficiencia">
+      <div><h2 class="me-h2">Eficiencia aeróbica al correr</h2><p class="me-sub">Metros que avanzas por cada latido en carreras de 4 km o más · la línea es la media semanal</p></div>
+      <p class="me-lede" data-read lang="es">En las últimas 4 semanas avanzaste <b data-draw="e-now" data-source="eficiencia_resumen" data-field="reciente" data-row="0">—</b> m por latido, <span class="me-eff-cmp">un <b data-draw="e-pct" data-source="eficiencia_resumen" data-field="cambio_pct" data-row="0">—</b>% <span data-draw="e-dir">—</span> que en las 8 semanas anteriores (<span data-draw="e-prev" data-source="eficiencia_resumen" data-field="anterior" data-row="0">—</span> m).</span></p>
+      <div class="me-chart" data-draw="chart-eff" data-source="eficiencia eficiencia_semana"></div>
+      <p class="me-note">Si este número sube, tu corazón trabaja menos para la misma velocidad: estás ganando forma aunque el ritmo no cambie. Lo afectan el calor, el desnivel y la fatiga, así que mira la tendencia y no cada punto.</p>
+    </div>
+
+    <div class="me-grid2">
+      <div class="me-card" id="ritmos">
+        <div><h2 class="me-h2">Tus ritmos de entrenamiento</h2><p class="me-sub">Estimados a partir de tu mejor marca de <span data-draw="r-anio" data-source="ritmos_base" data-field="anio" data-row="0">—</span>: <span data-draw="r-base" data-source="ritmos_base" data-field="base" data-row="0">—</span></p></div>
+        <div class="me-tablewrap">
+          <table class="me-table" data-source="ritmos" data-row-key="tipo">
+            <thead><tr><th data-field="tipo">Tipo de sesión</th><th data-field="rango" class="me-num">Ritmo</th><th data-field="uso">Para qué</th></tr></thead>
+            <tbody data-draw="ritmos"></tbody>
+          </table>
+        </div>
+        <p class="me-lede" data-read lang="es">En los últimos 28 días, <b data-draw="r-rapidos" data-source="rodajes_check" data-field="rapidos" data-row="0">—</b> de tus <b data-draw="r-total" data-source="rodajes_check" data-field="total" data-row="0">—</b> carreras de 4 km o más fueron más rápidas que tu ritmo suave. Si no eran sesiones de calidad, conviene ir más despacio.</p>
+        <p class="me-note">Son una estimación: si tu forma actual es peor que cuando hiciste esa marca, los ritmos rápidos te quedarán exigentes. Los rodajes suaves deberían sentirse cómodos, con la respiración controlada.</p>
+      </div>
+      <div class="me-card" id="ritmo">
+        <div><h2 class="me-h2">Ritmo medio de cada carrera</h2><p class="me-sub">Más arriba es más rápido · el tamaño del punto es la distancia</p></div>
+        <div class="me-chart" data-draw="chart-pace" data-source="activities"></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="records">
+      <div><h2 class="me-h2">Récords de carrera por año</h2><p class="me-sub">Tu mejor tiempo de cada año y el de siempre, según Strava</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="records_pivot" data-row-key="prueba">
+          <thead><tr><th data-field="prueba">Distancia</th><th data-field="y0" class="me-num" data-draw="rp-y0">—</th><th data-field="y1" class="me-num" data-draw="rp-y1">—</th><th data-field="y2" class="me-num" data-draw="rp-y2">—</th><th data-field="y3" class="me-num" data-draw="rp-y3">—</th><th data-field="siempre" class="me-num">Mejor de siempre</th></tr></thead>
+          <tbody data-draw="records-pivot"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="me-card" id="fondos">
+      <div><h2 class="me-h2">Tus salidas largas</h2><p class="me-sub">Carreras de 12 km o más, de la más reciente a la más antigua</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="fondos" data-row-key="id">
+          <thead><tr><th data-field="day">Fecha</th><th data-field="name">Actividad</th><th data-field="distance_km" class="me-num">Km</th><th data-field="pace" class="me-num">Ritmo</th><th data-field="fc_media" class="me-num">FC media</th><th data-field="elevation_m" class="me-num">Desnivel</th><th data-field="relative_effort" class="me-num">Esfuerzo</th></tr></thead>
+          <tbody data-draw="fondos"></tbody>
+        </table>
+      </div>
+      <p class="me-note">Para comparar, fíjate en ritmo y FC juntos: el mismo ritmo con menos FC indica mejor forma. Strava no registró el clima de estas actividades, así que el calor no aparece aquí.</p>
+    </div>
+
+    <div class="me-card" id="potencia">
+      <div><h2 class="me-h2">Potencia en bici</h2><p class="me-sub">Tu mejor potencia media en cada duración, por año (bici real y virtual)</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="potencia" data-row-key="esfuerzo">
+          <thead><tr><th data-field="esfuerzo">Duración</th><th data-field="y0" class="me-num" data-draw="p-y0">—</th><th data-field="y1" class="me-num" data-draw="p-y1">—</th><th data-field="y2" class="me-num" data-draw="p-y2">—</th><th data-field="y3" class="me-num" data-draw="p-y3">—</th></tr></thead>
+          <tbody data-draw="potencia"></tbody>
+        </table>
+      </div>
+      <div class="me-stats">
+        <div class="me-stat"><span class="me-stat-l">FTP estimado por ti</span><span class="me-stat-v"><span data-draw="f-20" data-source="ftp" data-field="ftp_20min" data-row="0">—</span><span class="me-kpi-unit">W</span></span><span class="me-kpi-sub">95 % de tu mejor 20 min de <span data-draw="f-anio" data-source="ftp" data-field="anio" data-row="0">—</span></span></div>
+        <div class="me-stat"><span class="me-stat-l">FTP en Strava</span><span class="me-stat-v"><span data-draw="f-strava" data-source="ftp" data-field="ftp_strava" data-row="0">—</span><span class="me-kpi-unit">W</span></span><span class="me-kpi-sub" data-draw="f-strava-src">—</span></div>
+      </div>
+      <p class="me-note">Si los dos FTP difieren mucho, actualiza el de Strava para que tus zonas de potencia y el Esfuerzo relativo en bici sean correctos.</p>
+    </div>
+  </section>
+
+  <!-- ==================== ÚLTIMO ENTRENAMIENTO ==================== -->
+  <section class="me-panel" id="sesion" role="tabpanel" hidden>
+    <div class="me-card" id="sesion-cabecera">
+      <div class="me-calbar">
+        <div class="me-sesion-tit">
+          <h2 class="me-month" data-draw="s-name" data-source="activities">—</h2>
+          <p class="me-sub" data-draw="s-when">—</p>
+        </div>
+        <label class="me-sub me-pick">Elegir otro entrenamiento
+          <select class="dash-select" id="s-select" data-draw="s-select" data-source="activities" aria-label="Elegir entrenamiento"></select>
+        </label>
+      </div>
+      <div class="me-stats" data-draw="s-stats" data-source="activities sesion"></div>
+    </div>
+
+    <div class="me-card" id="sesion-lectura">
+      <div><h2 class="me-h2">Lectura del entrenamiento</h2><p class="me-sub">Comparado con tus sesiones recientes del mismo deporte</p></div>
+      <ul class="me-reads" data-draw="s-lectura" data-source="sesion_lectura"></ul>
+    </div>
+
+    <div class="me-card" id="sesion-curva">
+      <div><h2 class="me-h2">Frecuencia cardíaca y velocidad durante la sesión</h2><p class="me-sub">Al correr se muestra el ritmo; más arriba es más rápido</p></div>
+      <div class="me-legend"><span><i class="me-dot" data-series="0"></i>Frecuencia cardíaca</span><span><i class="me-dot" data-series="1"></i><span data-draw="s-curve-label">—</span></span></div>
+      <div class="me-chart" data-draw="chart-s-curve" data-source="sesion_curva"></div>
+    </div>
+
+    <div class="me-grid2">
+      <div class="me-card" id="sesion-vueltas">
+        <div><h2 class="me-h2">FC media por vuelta</h2><p class="me-sub">El ancho de cada barra es la duración de la vuelta y el color, su zona</p></div>
+        <div class="me-chart" data-draw="chart-s-laps" data-source="sesion_vueltas"></div>
+      </div>
+      <div class="me-card" id="sesion-zonas">
+        <div><h2 class="me-h2">Tiempo en cada zona de FC</h2><p class="me-sub">Con tu FC máxima de 204 lpm</p></div>
+        <div class="me-chart" data-draw="chart-s-zones" data-source="sesion_zonas"></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="sesion-tabla">
+      <div><h2 class="me-h2">Vueltas</h2><p class="me-sub">Tal como las registró el reloj o la app</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="sesion_vueltas" data-row-key="vuelta">
+          <thead><tr><th data-field="vuelta" class="me-num">#</th><th data-field="distancia_km" class="me-num">Km</th><th data-field="tiempo" class="me-num">Tiempo</th><th data-field="ritmo" class="me-num">Ritmo</th><th data-field="vel_kmh" class="me-num">Km/h</th><th data-field="fc_media" class="me-num">FC media</th><th data-field="fc_max" class="me-num">FC máx.</th><th data-field="vatios" class="me-num">Vatios</th><th data-field="desnivel_m" class="me-num">Desnivel</th></tr></thead>
+          <tbody data-draw="s-laps-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="me-card" id="comparar">
+      <div class="me-calbar">
+        <div><h2 class="me-h2">Comparar con otro entrenamiento</h2><p class="me-sub">Por defecto, tu sesión anterior del mismo deporte</p></div>
+        <label class="me-sub me-pick">Comparar con
+          <select class="dash-select" id="c-select" data-draw="c-select" data-source="activities" aria-label="Entrenamiento para comparar"></select>
+        </label>
+      </div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="comparacion" data-row-key="metrica">
+          <thead><tr><th data-field="metrica">Dato</th><th data-field="a" class="me-num">Esta sesión</th><th data-field="b" class="me-num">Comparada</th><th data-field="dif" class="me-num">Diferencia</th></tr></thead>
+          <tbody data-draw="c-table"></tbody>
+        </table>
+      </div>
+      <div class="me-legend"><span><i class="me-dot" data-series="0"></i>Esta sesión</span><span><i class="me-dot" data-series="1"></i>Comparada</span></div>
+      <div class="me-grid2">
+        <div><h3 class="me-formtitle">Frecuencia cardíaca</h3><div class="me-chart" data-draw="chart-c-hr" data-source="sesion_curva comp_curva"></div></div>
+        <div><h3 class="me-formtitle" data-draw="c-speed-title">—</h3><div class="me-chart" data-draw="chart-c-speed" data-source="sesion_curva comp_curva"></div></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="sesion-marcas">
+      <div><h2 class="me-h2">Mejores esfuerzos de esta sesión</h2><p class="me-sub">Tus tiempos o vatios más altos dentro de este entrenamiento</p></div>
+      <p class="me-empty" id="s-marcas-empty" hidden>Strava no registró mejores esfuerzos en esta sesión.</p>
+      <div class="me-row" data-draw="s-marcas" data-source="sesion_marcas"></div>
+    </div>
+  </section>
+
+  <!-- ==================== DETALLE ==================== -->
+  <section class="me-panel" id="detalle" role="tabpanel" hidden>
+    <div class="me-card" id="carga">
+      <div><h2 class="me-h2">Carga de entrenamiento</h2><p class="me-sub">Últimos 120 días · basada en el Esfuerzo relativo de Strava</p></div>
+      <div class="me-legend"><span><i class="me-dot" data-series="0"></i>Aguda (7 días)</span><span><i class="me-dot" data-series="1"></i>Crónica (42 días)</span></div>
+      <div class="me-chart" data-draw="chart-load" data-source="carga"></div>
+      <p class="me-note" id="carga-nota">La <b>carga aguda</b> es el esfuerzo de la última semana y la <b>crónica</b> el de las últimas seis, ambas como medias ponderadas. Si la aguda supera en más de un 30 % a la crónica (cociente mayor que 1,3), estás subiendo rápido; por encima de 1,5 el riesgo de lesión aumenta. Por debajo de 0,8 estás descargando.</p>
+    </div>
+
+    <div class="me-card" id="zonas">
+      <div><h2 class="me-h2">Tiempo en zonas de frecuencia cardíaca al correr</h2><p class="me-sub">Últimas 6 semanas · cada vuelta de 1 km se asigna a la zona de su FC media</p></div>
+      <p class="me-lede" data-read lang="es">En las últimas 4 semanas corriste <b data-draw="z-suave" data-source="zonas_resumen" data-field="pct_suave" data-row="0">—</b>% del tiempo en zonas 1–2, <b data-draw="z-medio" data-source="zonas_resumen" data-field="pct_moderado" data-row="0">—</b>% en zona 3 y <b data-draw="z-alto" data-source="zonas_resumen" data-field="pct_intenso" data-row="0">—</b>% en zonas 4–5.</p>
+      <div class="me-legend"><span><i class="me-dot" data-zone="0"></i>Z1</span><span><i class="me-dot" data-zone="1"></i>Z2</span><span><i class="me-dot" data-zone="2"></i>Z3</span><span><i class="me-dot" data-zone="3"></i>Z4</span><span><i class="me-dot" data-zone="4"></i>Z5</span></div>
+      <div class="me-chart" data-draw="chart-zones" data-source="zonas_semana"></div>
+      <p class="me-note">Zonas calculadas con tu FC máxima de <b>204 lpm</b> (la más alta registrada, en tu media maratón del 15 de noviembre): zona 2 desde <span data-draw="z2min" data-source="zonas_fc" data-field="min" data-where="zona=Z2">—</span> lpm y zona 5 desde <span data-draw="z5min" data-source="zonas_fc" data-field="min" data-where="zona=Z5">—</span> lpm. Strava todavía usa zonas estimadas por edad; cambia tu FC máxima allí (Ajustes → Zonas de rendimiento) para que también lo use en la app. Lo habitual en un plan de fondo es correr cerca del 80 % del tiempo en zonas 1–2.</p>
+    </div>
+
+    <div class="me-card" id="deportes">
+      <div><h2 class="me-h2">Reparto por deporte</h2><p class="me-sub">Últimos 90 días · horas y sesiones</p></div>
+      <div class="me-chart" data-draw="chart-sports" data-source="deportes90"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---------- Cómo se convierten las respuestas de Strava en filas ----------
+dash.loader('activities', {
+  description: 'Une tres páginas de 100 actividades (las 300 más recientes) y aplana el resumen de cada una en columnas. Agrupa los tipos de Strava en seis categorías.',
+  fn: async ({ answer, call, args }) => {
+    const catOf = (t) => {
+      if (['Run', 'TrailRun', 'VirtualRun'].includes(t)) return 'Carrera';
+      if (['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide'].includes(t)) return 'Ciclismo';
+      if (t === 'Swim') return 'Natación';
+      if (['WeightTraining', 'Workout', 'Crossfit', 'HighIntensityIntervalTraining'].includes(t)) return 'Fuerza';
+      if (['Yoga', 'Pilates', 'Stretching'].includes(t)) return 'Movilidad';
+      return 'Otros';
+    };
+    const hms = (s) => {
+      s = Math.round(s || 0);
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+      const p = (n) => String(n).padStart(2, '0');
+      return h ? `${h}:${p(m)}:${p(ss)}` : `${m}:${p(ss)}`;
+    };
+    const rows = [];
+    let page = answer;
+    for (let i = 0; i < 3; i++) {
+      if (!page || page.error) throw new Error((page && (page.error.message || page.error)) || 'Strava no devolvió actividades');
+      for (const a of page.activities || []) {
+        const s = a.summary || {};
+        rows.push({
+          id: String(a.id),
+          name: a.name || '',
+          sport_type: a.sport_type || '',
+          categoria: catOf(a.sport_type),
+          start_local: a.start_local || '',
+          day: (a.start_local || '').slice(0, 10),
+          distance_km: s.distance != null ? Math.round(s.distance * 100) / 100 : 0,
+          moving_s: s.moving_time || 0,
+          duracion: hms(s.moving_time),
+          elevation_m: s.elevation_gain || 0,
+          pace_s_km: s.avg_pace != null ? Math.round(s.avg_pace) : null,
+          pace: s.avg_pace_display || s.avg_swim_pace_display || '',
+          relative_effort: s.relative_effort != null ? s.relative_effort : null,
+          calories: s.total_calories != null ? s.total_calories : null,
+          location: a.location_summary || ''
+        });
+      }
+      if (!page.has_next_page || i === 2) break;
+      page = await call('list_activities', { ...args, after: page.end_cursor });
+    }
+    return { rows, columns: ['id', 'day', 'name', 'sport_type', 'categoria', 'start_local', 'distance_km', 'moving_s', 'duracion', 'elevation_m', 'pace_s_km', 'pace', 'relative_effort', 'calories', 'location'] };
+  }
+});
+
+dash.loader('hr', {
+  description: 'De las 100 actividades más recientes toma las carreras de 4 km o más (hasta 25), pide a Strava el detalle de cada una y devuelve una fila por vuelta con su FC media y la FC media de la carrera.',
+  fn: async ({ answer, call }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió actividades');
+    const pick = (answer.activities || []).filter((a) => ['Run', 'TrailRun'].includes(a.sport_type) && ((a.summary && a.summary.distance) || 0) >= 4).slice(0, 25);
+    const rows = [];
+    let next = 0;
+    const worker = async () => {
+      while (next < pick.length) {
+        const a = pick[next++];
+        let p;
+        try { p = await call('get_activity_performance', { activity_id: String(a.id) }); } catch (e) { continue; }
+        if (!p || p.error || !p.has_heartrate) continue;
+        (p.laps || []).forEach((l, k) => {
+          if (l.avg_hr == null) return;
+          rows.push({ activity_id: String(a.id), day: (a.start_local || '').slice(0, 10), lap: k + 1, lap_s: l.moving_time || 0, lap_hr: Math.round(l.avg_hr), run_avg_hr: p.average_heartrate != null ? Math.round(p.average_heartrate) : null });
+        });
+      }
+    };
+    await Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
+    rows.sort((x, y) => (y.day.localeCompare(x.day)) || (x.activity_id.localeCompare(y.activity_id)) || (x.lap - y.lap));
+    return { rows, columns: ['activity_id', 'day', 'lap', 'lap_s', 'lap_hr', 'run_avg_hr'] };
+  }
+});
+
+dash.loader('zonas', {
+  description: 'Toma las 5 zonas de frecuencia cardíaca de Strava, una fila por zona, con el FTP de Strava en cada fila.',
+  fn: ({ answer }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió las zonas');
+    return (answer.heart_rate_zones || []).map((z, i) => ({ zona: 'Z' + (i + 1), min: z.min, max: z.max != null ? z.max : null, fuente: answer.heart_rate_zone_source || '', ftp: answer.ftp != null ? answer.ftp : null, ftp_estimado: !!answer.ftp_is_estimated }));
+  }
+});
+
+dash.loader('streak', {
+  description: 'Convierte la racha semanal de Strava en una fila.',
+  fn: ({ answer }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió la racha');
+    return [{ semanas: answer.length, estado: answer.streak_status, actividades: answer.valid_activity_count, desde: answer.start_date }];
+  }
+});
+
+dash.loader('records', {
+  description: 'Pone nombre en español a cada mejor marca, añade su distancia en metros y escribe el tiempo como h:mm:ss.',
+  fn: ({ answer }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió récords');
+    const names = { Fastest400: '400 m', Fastest1k: '1 km', FastestMile: '1 milla', Fastest5k: '5 km', Fastest10k: '10 km', Fastest15k: '15 km', FastestHalfMarathon: 'Media maratón', FastestMarathon: 'Maratón' };
+    const meters = { Fastest400: 400, Fastest1k: 1000, FastestMile: 1609.34, Fastest5k: 5000, Fastest10k: 10000, Fastest15k: 15000, FastestHalfMarathon: 21097.5, FastestMarathon: 42195 };
+    const fmt = (s) => { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60, p = (n) => String(n).padStart(2, '0'); return h ? `${h}:${p(m)}:${p(x)}` : `${m}:${p(x)}`; };
+    return (answer.efforts || []).map((e) => ({ prueba: names[e.best_effort_type] || e.best_effort_type, tiempo: fmt(e.value), segundos: e.value, metros: meters[e.best_effort_type] || null, fecha: e.date, activity_id: String(e.activity_id) }));
+  }
+});
+
+// ---------- Cálculos ----------
+dash.calc('zonas_fc', {
+  inputs: ['zonas'],
+  title: 'Zonas de FC con tu FC máxima',
+  description: 'Las 5 zonas de FC recalculadas con una FC máxima de 204 lpm, con los mismos porcentajes que usa Strava: zona 2 desde el 65 %, zona 3 desde el 81 %, zona 4 desde el 89 % y zona 5 desde el 97 %.',
+  fn: (zonas) => {
+    const FCMAX = 204;
+    const cuts = [0, 0.65, 0.81, 0.89, 0.97];
+    const mins = cuts.map((c) => Math.round(FCMAX * c));
+    return mins.map((m, i) => ({ zona: 'Z' + (i + 1), min: m, max: i < 4 ? mins[i + 1] - 1 : null }));
+  }
+});
+
+dash.calc('act_f', {
+  inputs: ['activities'],
+  title: 'Actividades del deporte elegido',
+  description: 'Las actividades cargadas, filtradas por el deporte elegido arriba (todas si no hay filtro).',
+  fn: (activities) => {
+    const dep = dash.params().deporte || '';
+    return dep ? activities.filter((r) => r.categoria === dep) : activities;
+  }
+});
+
+dash.calc('kpis', {
+  inputs: ['activities'],
+  title: 'Resumen de 28 días',
+  description: 'Km corriendo, horas y sesiones de los últimos 28 días (hoy incluido), y km corriendo de los 28 días anteriores.',
+  fn: (activities) => {
+    const DAY = 86400000, now = new Date();
+    const end = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) + DAY;
+    const ts = (k) => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+    let km = 0, kmPrev = 0, sec = 0, n = 0, runs = 0;
+    for (const r of activities) {
+      if (!r.day) continue;
+      const age = (end - ts(r.day)) / DAY;
+      if (age <= 0) continue;
+      if (age <= 28) {
+        sec += Number(r.moving_s) || 0; n++;
+        if (r.categoria === 'Carrera') { km += Number(r.distance_km) || 0; runs++; }
+      } else if (age <= 56 && r.categoria === 'Carrera') kmPrev += Number(r.distance_km) || 0;
+    }
+    const r1 = (x) => Math.round(x * 10) / 10;
+    return [{ km28: r1(km), km_prev: r1(kmPrev), cambio_pct: kmPrev > 0 ? Math.round((km - kmPrev) / kmPrev * 100) : null, horas28: r1(sec / 3600), sesiones28: n, salidas28: runs }];
+  }
+});
+
+dash.calc('weekly', {
+  inputs: ['act_f'],
+  title: 'Totales por semana y deporte',
+  description: 'Horas en movimiento y km por categoría en cada una de las últimas 16 semanas (lunes a domingo).',
+  fn: (activities) => {
+    const DAY = 86400000, WEEKS = 16, now = new Date();
+    const cats = ['Carrera', 'Ciclismo', 'Natación', 'Fuerza', 'Movilidad', 'Otros'];
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const monday = today - ((new Date(today).getUTCDay() + 6) % 7) * DAY;
+    const start = monday - (WEEKS - 1) * 7 * DAY;
+    const acc = {};
+    for (const r of activities) {
+      if (!r.day) continue;
+      const [y, m, d] = r.day.split('-').map(Number);
+      const i = Math.floor((Date.UTC(y, m - 1, d) - start) / (7 * DAY));
+      if (i < 0 || i >= WEEKS) continue;
+      const k = i + '|' + r.categoria;
+      acc[k] = acc[k] || { s: 0, km: 0 };
+      acc[k].s += Number(r.moving_s) || 0;
+      acc[k].km += Number(r.distance_km) || 0;
+    }
+    const out = [];
+    for (let i = 0; i < WEEKS; i++) {
+      const semana = new Date(start + i * 7 * DAY).toISOString().slice(0, 10);
+      for (const c of cats) {
+        const a = acc[i + '|' + c] || { s: 0, km: 0 };
+        out.push({ semana, categoria: c, horas: Math.round(a.s / 36) / 100, km: Math.round(a.km * 10) / 10 });
+      }
+    }
+    return out;
+  }
+});
+
+dash.calc('deportes90', {
+  inputs: ['act_f'],
+  title: 'Reparto por deporte, 90 días',
+  description: 'Horas en movimiento y número de sesiones por categoría en los últimos 90 días.',
+  fn: (activities) => {
+    const DAY = 86400000, now = new Date();
+    const end = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) + DAY;
+    const acc = {};
+    for (const r of activities) {
+      if (!r.day) continue;
+      const [y, m, d] = r.day.split('-').map(Number);
+      const age = (end - Date.UTC(y, m - 1, d)) / DAY;
+      if (age <= 0 || age > 90) continue;
+      acc[r.categoria] = acc[r.categoria] || { s: 0, n: 0 };
+      acc[r.categoria].s += Number(r.moving_s) || 0;
+      acc[r.categoria].n++;
+    }
+    return Object.entries(acc).map(([categoria, a]) => ({ categoria, horas: Math.round(a.s / 360) / 10, sesiones: a.n })).sort((a, b) => b.horas - a.horas);
+  }
+});
+
+dash.calc('constancia', {
+  inputs: ['activities'],
+  title: 'Días desde la última sesión',
+  description: 'Para cada deporte, la fecha de la última sesión cargada y cuántos días pasaron desde entonces.',
+  fn: (activities) => {
+    const DAY = 86400000, now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const last = {};
+    for (const r of activities) if (r.day && (!last[r.categoria] || r.day > last[r.categoria])) last[r.categoria] = r.day;
+    return ['Carrera', 'Ciclismo', 'Natación', 'Fuerza', 'Movilidad'].map((c) => {
+      if (!last[c]) return { categoria: c, ultima: null, dias: null };
+      const [y, m, d] = last[c].split('-').map(Number);
+      return { categoria: c, ultima: last[c], dias: Math.round((today - Date.UTC(y, m - 1, d)) / DAY) };
+    });
+  }
+});
+
+dash.calc('carga', {
+  inputs: ['act_f'],
+  title: 'Carga aguda y crónica',
+  description: 'Suma diaria del Esfuerzo relativo de Strava; carga aguda = media ponderada exponencial de 7 días, crónica = de 42 días, y su cociente. Se muestran los últimos 120 días.',
+  fn: (activities) => {
+    const DAY = 86400000, now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const byDay = {};
+    let first = today;
+    for (const r of activities) {
+      if (!r.day) continue;
+      const [y, m, d] = r.day.split('-').map(Number);
+      const t = Date.UTC(y, m - 1, d);
+      if (t < first) first = t;
+      byDay[t] = (byDay[t] || 0) + (Number(r.relative_effort) || 0);
+    }
+    const ka = 1 - Math.exp(-1 / 7), kc = 1 - Math.exp(-1 / 42);
+    let atl = 0, ctl = 0;
+    const out = [];
+    for (let t = first; t <= today; t += DAY) {
+      const e = byDay[t] || 0;
+      atl += (e - atl) * ka; ctl += (e - ctl) * kc;
+      if (today - t < 120 * DAY) out.push({ day: new Date(t).toISOString().slice(0, 10), esfuerzo: e, aguda: Math.round(atl * 10) / 10, cronica: Math.round(ctl * 10) / 10, ratio: ctl > 0 ? Math.round(atl / ctl * 100) / 100 : null });
+    }
+    return out;
+  }
+});
+
+dash.calc('zonas_semana', {
+  inputs: ['hr', 'zonas_fc'],
+  title: 'Horas por zona de FC y semana',
+  description: 'Suma el tiempo de cada vuelta de carrera en la zona de su FC media, por semana (lunes a domingo), últimas 6 semanas.',
+  fn: (hr, zonas) => {
+    const DAY = 86400000, WEEKS = 6, now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const monday = today - ((new Date(today).getUTCDay() + 6) % 7) * DAY;
+    const start = monday - (WEEKS - 1) * 7 * DAY;
+    const zoneOf = (h) => { for (let i = zonas.length - 1; i >= 0; i--) if (h >= Number(zonas[i].min)) return i; return 0; };
+    const acc = {};
+    for (const l of hr) {
+      const [y, m, d] = l.day.split('-').map(Number);
+      const i = Math.floor((Date.UTC(y, m - 1, d) - start) / (7 * DAY));
+      if (i < 0 || i >= WEEKS) continue;
+      const k = i + '|' + zoneOf(Number(l.lap_hr));
+      acc[k] = (acc[k] || 0) + (Number(l.lap_s) || 0);
+    }
+    const out = [];
+    for (let i = 0; i < WEEKS; i++) {
+      let tot = 0;
+      for (let z = 0; z < zonas.length; z++) tot += acc[i + '|' + z] || 0;
+      for (let z = 0; z < zonas.length; z++) {
+        const s = acc[i + '|' + z] || 0;
+        out.push({ semana: new Date(start + i * 7 * DAY).toISOString().slice(0, 10), zona: 'Z' + (z + 1), horas: Math.round(s / 36) / 100, pct: tot ? Math.round(s / tot * 100) : 0 });
+      }
+    }
+    return out;
+  }
+});
+
+dash.calc('zonas_resumen', {
+  inputs: ['zonas_semana'],
+  title: 'Reparto de zonas, últimas 4 semanas',
+  description: 'Porcentaje del tiempo de carrera de las últimas 4 semanas en zonas 1–2, 3 y 4–5.',
+  fn: (zonasSemana) => {
+    const weeks = [...new Set(zonasSemana.map((r) => r.semana))].sort().slice(-4);
+    let s12 = 0, s3 = 0, s45 = 0;
+    for (const r of zonasSemana) {
+      if (!weeks.includes(r.semana)) continue;
+      if (r.zona === 'Z1' || r.zona === 'Z2') s12 += r.horas; else if (r.zona === 'Z3') s3 += r.horas; else s45 += r.horas;
+    }
+    const tot = s12 + s3 + s45;
+    if (!tot) return [{ pct_suave: null, pct_moderado: null, pct_intenso: null }];
+    return [{ pct_suave: Math.round(s12 / tot * 100), pct_moderado: Math.round(s3 / tot * 100), pct_intenso: Math.round(s45 / tot * 100) }];
+  }
+});
+
+dash.calc('fondos', {
+  inputs: ['activities', 'hr'],
+  title: 'Salidas largas',
+  description: 'Carreras de 12 km o más, con la FC media que da Strava para cada una.',
+  fn: (activities, hr) => {
+    const fc = {};
+    for (const l of hr) if (l.run_avg_hr != null) fc[l.activity_id] = l.run_avg_hr;
+    return activities.filter((r) => r.categoria === 'Carrera' && Number(r.distance_km) >= 12).slice(0, 15)
+      .map((r) => ({ id: r.id, day: r.day, name: r.name, distance_km: r.distance_km, pace: r.pace, pace_s_km: r.pace_s_km, fc_media: fc[r.id] != null ? fc[r.id] : null, elevation_m: Math.round(Number(r.elevation_m) || 0), relative_effort: r.relative_effort }));
+  }
+});
+
+dash.calc('metas_progreso', {
+  inputs: ['metas', 'activities'],
+  title: 'Progreso de objetivos',
+  description: 'Para cada objetivo, el total del periodo en curso (semana de lunes a domingo, mes o año natural) frente al objetivo, y qué parte del periodo ya pasó.',
+  fn: (metas, activities) => {
+    const DAY = 86400000, now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const per = (p) => {
+      if (p === 'semana') { const s = today - ((new Date(today).getUTCDay() + 6) % 7) * DAY; return [s, s + 7 * DAY]; }
+      if (p === 'anio') return [Date.UTC(now.getFullYear(), 0, 1), Date.UTC(now.getFullYear() + 1, 0, 1)];
+      return [Date.UTC(now.getFullYear(), now.getMonth(), 1), Date.UTC(now.getFullYear(), now.getMonth() + 1, 1)];
+    };
+    const perTxt = { semana: 'esta semana', mes: 'este mes', anio: 'este año' };
+    return metas.map((g) => {
+      const [s, e] = per(g.periodo);
+      let actual = 0;
+      for (const r of activities) {
+        if (!r.day) continue;
+        const [y, m, d] = r.day.split('-').map(Number);
+        const t = Date.UTC(y, m - 1, d);
+        if (t < s || t >= e) continue;
+        if (g.tipo === 'km_carrera') { if (r.categoria === 'Carrera') actual += Number(r.distance_km) || 0; }
+        else if (g.tipo === 'horas') actual += (Number(r.moving_s) || 0) / 3600;
+        else if (!g.categoria || r.categoria === g.categoria) actual += 1;
+      }
+      const obj = Number(g.objetivo) || 0;
+      const unidad = g.tipo === 'km_carrera' ? 'km' : g.tipo === 'horas' ? 'h' : 'sesiones';
+      const titulo = g.tipo === 'km_carrera' ? `Correr ${obj} km ${perTxt[g.periodo] || ''}`
+        : g.tipo === 'horas' ? `Entrenar ${obj} h ${perTxt[g.periodo] || ''}`
+        : `${obj} sesiones${g.categoria ? ' de ' + g.categoria : ''} ${perTxt[g.periodo] || ''}`;
+      const pct = obj ? Math.round(actual / obj * 100) : 0;
+      const esperado = Math.round(Math.min(1, (today + DAY - s) / (e - s)) * 100);
+      return { id: g.id, titulo: titulo.trim(), actual: Math.round(actual * 10) / 10, objetivo: obj, unidad, pct, esperado, estado: pct >= 100 ? 'Cumplido' : pct >= esperado - 5 ? 'En camino' : 'Atrasado' };
+    });
+  }
+});
+
+dash.calc('carreras_cd', {
+  inputs: ['carreras', 'records'],
+  title: 'Próximas carreras',
+  description: 'Días que faltan para cada carrera y tiempo estimado con la fórmula de Riegel (T2 = T1 × (D2/D1)^1,06) aplicada al récord de distancia más cercana.',
+  fn: (carreras, records) => {
+    const DAY = 86400000, now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const fmt = (s) => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60, p = (n) => String(n).padStart(2, '0'); return h ? `${h}:${p(m)}:${p(x)}` : `${m}:${p(x)}`; };
+    const recs = records.filter((r) => r.metros && r.segundos);
+    return carreras.filter((c) => c.fecha && Number(c.distancia_km) > 0).map((c) => {
+      const [y, m, d] = c.fecha.split('-').map(Number);
+      const dias = Math.round((Date.UTC(y, m - 1, d) - today) / DAY);
+      const D = Number(c.distancia_km) * 1000;
+      let best = null;
+      for (const r of recs) { const dist = Math.abs(Math.log(D / r.metros)); if (!best || dist < best.dist) best = { r, dist }; }
+      const pred = best ? best.r.segundos * Math.pow(D / best.r.metros, 1.06) : null;
+      return { id: c.id, nombre: c.nombre || '', fecha: c.fecha, dias, distancia_km: Number(c.distancia_km), objetivo: c.objetivo || '', prediccion: pred ? fmt(pred) : null, ritmo_pred: pred ? fmt(pred / (D / 1000)) + ' /km' : null, base: best ? `${best.r.prueba} en ${best.r.tiempo} (${best.r.fecha})` : null };
+    }).filter((c) => c.dias >= -7).sort((a, b) => a.dias - b.dias);
+  }
+});
+</script>
+
+<script>
+// ---------- Utilidades compartidas ----------
+window.ME = (() => {
+  const CATS = ['Carrera', 'Ciclismo', 'Natación', 'Fuerza', 'Movilidad', 'Otros'];
+  const color = (c) => { const i = CATS.indexOf(c); return i < 0 ? 'var(--cds-chart-muted)' : dash.colors[i % dash.colors.length]; };
+  const ZONE_COLORS = ['var(--cds-chart-muted)', dash.colors[0], dash.colors[2 % dash.colors.length], dash.colors[3 % dash.colors.length], 'var(--cds-chart-status-critical)'];
+  const pad = (n) => String(n).padStart(2, '0');
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const keyToUTC = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+  const utcKey = (dt) => dt.toISOString().slice(0, 10);
+  const fmtShort = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const fmtLong = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const fmtDate = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const fmtMonth = new Intl.DateTimeFormat('es', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const fmtNum = (x, d = 1) => Number(x).toLocaleString('es', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const fmtPace = (s) => `${Math.floor(s / 60)}:${pad(Math.round(s % 60))}`;
+  const hasDist = (r) => (Number(r.distance_km) || 0) > 0.1 && ['Carrera', 'Ciclismo', 'Natación'].includes(r.categoria);
+  const chipText = (r) => hasDist(r) ? `${fmtNum(r.distance_km, 1)} km` : `${Math.round((Number(r.moving_s) || 0) / 60)} min`;
+  const state = { month: new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)), sel: todayKey };
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  function tip(host) {
+    let t = host.querySelector(':scope > .me-tip');
+    if (!t) { t = el('div', 'me-tip'); t.hidden = true; host.appendChild(t); }
+    return {
+      show(lines, x, y) {
+        t.replaceChildren(...lines.map((s) => el('div', '', s)));
+        t.hidden = false;
+        const w = t.offsetWidth, W = host.clientWidth;
+        t.style.left = Math.max(0, Math.min(W - w, x - w / 2)) + 'px';
+        t.style.top = Math.max(0, y - t.offsetHeight - 10) + 'px';
+      },
+      hide() { t.hidden = true; }
+    };
+  }
+  function status(host, d, what) {
+    if (d.status === 'ok') return true;
+    host.replaceChildren(d.status === 'error' ? el('p', 'me-err', `No se pudo cargar ${what}.`) : el('p', 'me-muted', '—'));
+    return false;
+  }
+  function textWidth(svg, strings) {
+    const t = svg.append('text').attr('class', 'me-axl');
+    let w = 0;
+    for (const s of strings) { t.text(s); w = Math.max(w, t.node().getComputedTextLength()); }
+    t.remove();
+    return w;
+  }
+  // Guardar en tu espacio privado del panel
+  async function base() {
+    const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+    const uid = user ? await user.id() : null;
+    if (!db || !uid) throw new Error('sin acceso');
+    return { db, root: `data/users/${uid}` };
+  }
+  const store = {
+    async add(coll, row) { const { db, root } = await base(); await db.collection(`${root}/${coll}`).add(row); },
+    async del(coll, id) { const { db, root } = await base(); await db.doc(`${root}/${coll}/${id}`).delete(); }
+  };
+  function flash(name, ok) {
+    document.querySelectorAll(`[data-msg="${name}-ok"]`).forEach((p) => { p.hidden = !ok; });
+    document.querySelectorAll(`[data-msg="${name}-bad"]`).forEach((p) => { p.hidden = ok; });
+    if (ok) setTimeout(() => document.querySelectorAll(`[data-msg="${name}-ok"]`).forEach((p) => { p.hidden = true; }), 2500);
+  }
+  return { CATS, ZONE_COLORS, color, todayKey, keyToUTC, utcKey, fmtShort, fmtLong, fmtDate, fmtMonth, fmtNum, fmtPace, chipText, hasDist, state, tip, status, textWidth, pad, el, store, flash };
+})();
+
+// ---------- Años para récords y potencia (este año y los 3 anteriores) ----------
+(() => {
+  const y = new Date().getFullYear();
+  const want = [y - 3, y - 2, y - 1, y];
+  const cur = dash.params().anios;
+  if (String(cur) !== String(want)) dash.setParams({ anios: want });
+})();
+
+// ---------- Filtro de deporte ----------
+document.querySelectorAll('#f-deporte').forEach((s) => {
+  s.value = dash.params().deporte || '';
+  s.addEventListener('change', () => dash.setParams({ deporte: s.value }));
+});
+dash.onData(() => document.querySelectorAll('#f-deporte').forEach((s) => { if (document.activeElement !== s) s.value = dash.params().deporte || ''; }));
+
+// ---------- Pestañas ----------
+(() => {
+  const names = ['resumen', 'calendario', 'progreso', 'sesion', 'detalle'];
+  const show = (name, link) => {
+    if (!names.includes(name)) name = 'resumen';
+    document.querySelectorAll('.me-tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+    names.forEach((n) => document.querySelectorAll('#' + n).forEach((s) => { s.hidden = n !== name; }));
+    if (link) dash.setLink(name);
+  };
+  document.querySelectorAll('.me-tab').forEach((b) => b.addEventListener('click', () => show(b.dataset.tab, true)));
+  show((location.hash || '').slice(1), false);
+  window.addEventListener('hashchange', () => show((location.hash || '').slice(1), false));
+  window.addEventListener('beforeprint', () => names.forEach((n) => document.querySelectorAll('#' + n).forEach((s) => { s.hidden = false; })));
+  window.addEventListener('afterprint', () => show(document.querySelector('.me-tab[aria-selected="true"]')?.dataset.tab || 'resumen', false));
+})();
+
+// ---------- Colores de leyendas ----------
+dash.onData(() => {
+  document.querySelectorAll('.me-legend [data-cat]').forEach((d) => { d.style.background = ME.color(d.dataset.cat); });
+  document.querySelectorAll('.me-legend [data-series]').forEach((d) => { d.style.background = d.dataset.series === '0' ? dash.colors[0] : dash.colors[1 % dash.colors.length]; });
+  document.querySelectorAll('.me-legend [data-zone]').forEach((d) => { d.style.background = ME.ZONE_COLORS[Number(d.dataset.zone)]; });
+});
+
+window.meRedrawDay = () => ['month-label', 'calendar'].forEach((n) => dash.draw(n));
+
+// Navegación del calendario
+document.querySelectorAll('[data-cal-nav]').forEach((b) => b.addEventListener('click', () => {
+  const step = Number(b.dataset.calNav), s = ME.state;
+  if (step === 0) { const n = new Date(); s.month = new Date(Date.UTC(n.getFullYear(), n.getMonth(), 1)); }
+  else s.month = new Date(Date.UTC(s.month.getUTCFullYear(), s.month.getUTCMonth() + step, 1));
+  window.meRedrawDay();
+}));
+
+// ---------- Formularios ----------
+const meNum = (id) => { const i = document.getElementById(id); return i && i.value !== '' && i.validity.valid ? Number(i.value) : null; };
+const meTxt = (id) => { const i = document.getElementById(id); return i ? i.value.trim() : ''; };
+const meForm = (id, fn) => document.querySelectorAll('#' + id).forEach((f) => f.addEventListener('submit', async (ev) => { ev.preventDefault(); if (!f.reportValidity()) return; await fn(f); }));
+
+meForm('form-meta', async (f) => {
+  const tipo = meTxt('f-meta-tipo');
+  const row = { tipo, periodo: meTxt('f-meta-per'), objetivo: meNum('f-meta-obj') };
+  if (tipo === 'sesiones' && meTxt('f-meta-cat')) row.categoria = meTxt('f-meta-cat');
+  try { await ME.store.add('metas/items', row); ME.flash('meta', true); document.querySelectorAll('#f-meta-obj').forEach((i) => { i.value = ''; }); }
+  catch { ME.flash('meta', false); }
+});
+
+meForm('form-carrera', async (f) => {
+  const row = { nombre: meTxt('f-car-nombre'), fecha: meTxt('f-car-fecha'), distancia_km: meNum('f-car-dist') };
+  const obj = meTxt('f-car-obj');
+  if (obj) row.objetivo = obj;
+  try { await ME.store.add('carreras/items', row); ME.flash('carrera', true); f.reset(); }
+  catch { ME.flash('carrera', false); }
+});
+</script>
+
+<script>
+// ---------- Textos y tarjetas ----------
+const meRow0 = (id) => { const d = dash.data(id); return d.status === 'ok' && Array.isArray(d.data) && d.data[0] ? d.data[0] : null; };
+const meSet = (el, v) => { el.textContent = v == null ? '—' : v; };
+
+dash.draw('t-km', (el) => { const k = meRow0('kpis'); meSet(el, k && ME.fmtNum(k.km28)); });
+dash.draw('t-runs', (el) => { const k = meRow0('kpis'); meSet(el, k && k.salidas28); });
+dash.draw('t-pct', (el) => {
+  const k = meRow0('kpis');
+  document.querySelectorAll('.me-cmp').forEach((c) => { c.hidden = !k || k.cambio_pct == null; });
+  meSet(el, k && k.cambio_pct != null ? Math.abs(k.cambio_pct) : null);
+});
+dash.draw('t-dir', (el) => { const k = meRow0('kpis'); meSet(el, k && k.cambio_pct != null ? (k.cambio_pct >= 0 ? 'más' : 'menos') : null); });
+dash.draw('t-streak', (el) => { const s = meRow0('streak'); meSet(el, s && s.semanas); });
+dash.draw('k-km', (el) => { const k = meRow0('kpis'); meSet(el, k && ME.fmtNum(k.km28)); });
+dash.draw('k-km-prev', (el) => { const k = meRow0('kpis'); meSet(el, k && ME.fmtNum(k.km_prev)); });
+dash.draw('k-km-delta', (el) => {
+  const k = meRow0('kpis');
+  el.className = '';
+  if (!k || k.cambio_pct == null) return meSet(el, null);
+  el.className = k.cambio_pct >= 0 ? 'me-good' : 'me-bad';
+  meSet(el, `${k.cambio_pct >= 0 ? '▲ +' : '▼ '}${k.cambio_pct}%`);
+});
+dash.draw('k-streak', (el) => { const s = meRow0('streak'); meSet(el, s && s.semanas); });
+dash.draw('k-streak-since', (el) => { const s = meRow0('streak'); meSet(el, s && s.desde ? ME.fmtDate.format(ME.keyToUTC(s.desde)) : null); });
+dash.draw('z-suave', (el) => { const z = meRow0('zonas_resumen'); meSet(el, z && z.pct_suave); });
+dash.draw('z-medio', (el) => { const z = meRow0('zonas_resumen'); meSet(el, z && z.pct_moderado); });
+dash.draw('z-alto', (el) => { const z = meRow0('zonas_resumen'); meSet(el, z && z.pct_intenso); });
+dash.draw('z5min', (el) => { const d = dash.data('zonas_fc'); const z = d.status === 'ok' ? d.data.find((r) => r.zona === 'Z5') : null; meSet(el, z && z.min); });
+dash.draw('z2min', (el) => { const d = dash.data('zonas_fc'); const z = d.status === 'ok' ? d.data.find((r) => r.zona === 'Z2') : null; meSet(el, z && z.min); });
+
+dash.draw('constancia', (el) => {
+  const d = dash.data('constancia');
+  if (!ME.status(el, d, 'la constancia')) return;
+  el.replaceChildren(...d.data.map((r) => {
+    const p = ME.el('span', 'me-pill' + (r.dias == null || r.dias >= 30 ? ' is-bad' : r.dias >= 14 ? ' is-warn' : ' is-ok'));
+    const dot = ME.el('i', 'me-dot'); dot.style.background = ME.color(r.categoria);
+    p.append(dot, ME.el('span', '', r.dias == null ? `${r.categoria}: sin sesiones cargadas` : r.dias === 0 ? `${r.categoria}: hoy` : `${r.categoria}: hace ${r.dias} ${r.dias === 1 ? 'día' : 'días'}`));
+    p.title = r.ultima ? `Última: ${r.ultima}` : '';
+    return p;
+  }));
+});
+
+// ---------- Calendario ----------
+dash.draw('month-label', (el) => { el.textContent = ME.fmtMonth.format(ME.state.month); });
+
+dash.draw('calendar', (el) => {
+  const a = dash.data('act_f');
+  if (a.status === 'error') return ME.status(el, a, 'tus actividades');
+  const acts = new Map();
+  if (a.status === 'ok') for (const r of a.data) { if (!acts.has(r.day)) acts.set(r.day, []); acts.get(r.day).push(r); }
+  for (const v of acts.values()) v.sort((x, y) => x.start_local.localeCompare(y.start_local));
+  const DAY = 86400000, m0 = ME.state.month;
+  const offset = (m0.getUTCDay() + 6) % 7;
+  const start = new Date(m0.getTime() - offset * DAY);
+  const nextMonth = new Date(Date.UTC(m0.getUTCFullYear(), m0.getUTCMonth() + 1, 1));
+  const cells = [];
+  for (let w = 0; w < 6; w++) {
+    const wkStart = new Date(start.getTime() + w * 7 * DAY);
+    if (w > 3 && wkStart >= nextMonth) break;
+    let wkSec = 0, wkRun = 0;
+    for (let d = 0; d < 7; d++) {
+      const dt = new Date(wkStart.getTime() + d * DAY), key = ME.utcKey(dt);
+      const list = acts.get(key) || [];
+      const c0 = ME.el('div', 'me-day' + (dt.getUTCMonth() !== m0.getUTCMonth() ? ' is-out' : '') + (key === ME.todayKey ? ' is-today' : ''));
+      c0.setAttribute('aria-label', `${ME.fmtLong.format(dt)}: ${list.length} actividades`);
+      c0.appendChild(ME.el('span', 'me-dnum', dt.getUTCDate()));
+      const dots = ME.el('span', 'me-dots');
+      for (const r of list) {
+        wkSec += Number(r.moving_s) || 0;
+        if (r.categoria === 'Carrera') wkRun += Number(r.distance_km) || 0;
+        const c = ME.el('span', 'me-chip');
+        c.title = `${r.name} · ${r.duracion}${r.pace ? ' · ' + r.pace : ''}`;
+        const dot = ME.el('i', 'me-dot'); dot.style.background = ME.color(r.categoria);
+        c.append(dot, ME.el('span', 'me-chip-t', ME.chipText(r)));
+        c0.appendChild(c);
+        const dd = ME.el('i', 'me-dot'); dd.style.background = ME.color(r.categoria); dots.appendChild(dd);
+      }
+      c0.appendChild(dots);
+      cells.push(c0);
+    }
+    const wk = ME.el('div', 'me-wk');
+    wk.append(ME.el('b', '', wkSec ? `${ME.fmtNum(wkSec / 3600)} h` : '—'), ME.el('span', '', wkRun ? `${ME.fmtNum(wkRun)} km corr.` : ''));
+    cells.push(wk);
+  }
+  el.replaceChildren(...cells);
+});
+
+// ---------- Gráficos ----------
+const meSvg = (el, H, label) => { el.replaceChildren(); return d3.select(el).append('svg').attr('width', '100%').attr('height', H).attr('viewBox', `0 0 ${el.clientWidth} ${H}`).attr('role', 'img').attr('aria-label', label); };
+const meWeekAxis = (svg, x, H, weeks, W) => {
+  const every = W < 420 ? 3 : 2;
+  svg.append('g').attr('transform', `translate(0,${H - 26})`).call(d3.axisBottom(x).tickValues(weeks.filter((_, i) => (weeks.length - 1 - i) % every === 0)).tickFormat((s) => ME.fmtShort.format(ME.keyToUTC(s))).tickSizeOuter(0));
+};
+
+dash.draw('chart-runkm', (el) => {
+  const d = dash.data('weekly');
+  if (!ME.status(el, d, 'el volumen semanal')) return;
+  const rows = d.data.filter((r) => r.categoria === 'Carrera');
+  const W = el.clientWidth, H = 230, svg = meSvg(el, H, 'Kilómetros de carrera por semana en las últimas 16 semanas');
+  const y = d3.scaleLinear().domain([0, (d3.max(rows, (r) => r.km) || 10) * 1.15]).nice().range([H - 26, 10]);
+  const ml = ME.textWidth(svg, y.ticks(4).map(String)) + 10;
+  const x = d3.scaleBand().domain(rows.map((r) => r.semana)).range([ml, W - 4]).padding(0.25);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(W - ml - 4))).call((g) => g.select('.domain').remove());
+  meWeekAxis(svg, x, H, x.domain(), W);
+  const tp = ME.tip(el);
+  svg.append('g').selectAll('rect').data(rows).join('rect')
+    .attr('x', (r) => x(r.semana)).attr('width', x.bandwidth()).attr('y', (r) => y(r.km)).attr('height', (r) => y(0) - y(r.km)).attr('rx', 2)
+    .style('fill', dash.colors[0])
+    .on('pointerenter pointermove', (ev, r) => { const [px, py] = d3.pointer(ev, el); tp.show([`Semana del ${ME.fmtShort.format(ME.keyToUTC(r.semana))}`, `${ME.fmtNum(r.km)} km corriendo`], px, py); })
+    .on('pointerleave', () => tp.hide());
+  const last = rows[rows.length - 1];
+  if (last) svg.append('text').attr('class', 'me-val').attr('x', x(last.semana) + x.bandwidth()).attr('y', y(last.km) - 5).attr('text-anchor', 'end').text(`${ME.fmtNum(last.km)} km`);
+});
+
+dash.draw('chart-hours', (el) => {
+  const d = dash.data('weekly');
+  if (!ME.status(el, d, 'el volumen semanal')) return;
+  const weeks = [...new Set(d.data.map((r) => r.semana))];
+  const table = weeks.map((w) => { const o = { semana: w }; for (const c of ME.CATS) o[c] = 0; for (const r of d.data) if (r.semana === w) o[r.categoria] = r.horas; return o; });
+  const series = d3.stack().keys(ME.CATS)(table);
+  const W = el.clientWidth, H = 230, svg = meSvg(el, H, 'Horas de entrenamiento por semana, separadas por deporte');
+  const y = d3.scaleLinear().domain([0, (d3.max(table, (o) => ME.CATS.reduce((s, c) => s + o[c], 0)) || 1) * 1.1]).nice().range([H - 26, 10]);
+  const ml = ME.textWidth(svg, y.ticks(4).map((v) => v + ' h')) + 10;
+  const x = d3.scaleBand().domain(weeks).range([ml, W - 4]).padding(0.25);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => v + ' h').tickSize(-(W - ml - 4))).call((g) => g.select('.domain').remove());
+  meWeekAxis(svg, x, H, weeks, W);
+  const tp = ME.tip(el);
+  svg.append('g').selectAll('g').data(series).join('g').style('fill', (s) => ME.color(s.key))
+    .selectAll('rect').data((s) => s).join('rect')
+    .attr('x', (p) => x(p.data.semana)).attr('width', x.bandwidth()).attr('y', (p) => y(p[1])).attr('height', (p) => Math.max(0, y(p[0]) - y(p[1])))
+    .on('pointerenter pointermove', (ev, p) => {
+      const [px, py] = d3.pointer(ev, el), o = p.data;
+      const lines = [`Semana del ${ME.fmtShort.format(ME.keyToUTC(o.semana))}: ${ME.fmtNum(ME.CATS.reduce((s, c) => s + o[c], 0))} h`];
+      for (const c of ME.CATS) if (o[c] > 0) lines.push(`${c}: ${ME.fmtNum(o[c])} h`);
+      tp.show(lines, px, py);
+    })
+    .on('pointerleave', () => tp.hide());
+});
+
+dash.draw('chart-load', (el) => {
+  const d = dash.data('carga');
+  if (!ME.status(el, d, 'la carga')) return;
+  const rows = d.data;
+  if (!rows.length) return el.replaceChildren(ME.el('p', 'me-muted', 'Sin datos de esfuerzo.'));
+  const W = el.clientWidth, H = 230, svg = meSvg(el, H, 'Carga aguda y crónica de los últimos 120 días');
+  const y = d3.scaleLinear().domain([0, d3.max(rows, (r) => Math.max(r.aguda, r.cronica)) * 1.1 || 1]).nice().range([H - 26, 10]);
+  const ml = ME.textWidth(svg, y.ticks(4).map(String)) + 10;
+  const x = d3.scaleUtc().domain(d3.extent(rows, (r) => ME.keyToUTC(r.day))).range([ml, W - 8]);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(W - ml - 8))).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('transform', `translate(0,${H - 26})`).call(d3.axisBottom(x).ticks(W < 420 ? 3 : 5).tickFormat((t) => ME.fmtShort.format(t)).tickSizeOuter(0));
+  const line = (k) => d3.line().x((r) => x(ME.keyToUTC(r.day))).y((r) => y(r[k]));
+  svg.append('path').datum(rows).attr('d', line('cronica')).style('fill', 'none').style('stroke', dash.colors[1 % dash.colors.length]).style('stroke-width', 2);
+  svg.append('path').datum(rows).attr('d', line('aguda')).style('fill', 'none').style('stroke', dash.colors[0]).style('stroke-width', 2);
+  const last = rows[rows.length - 1];
+  svg.append('circle').attr('cx', x(ME.keyToUTC(last.day))).attr('cy', y(last.aguda)).attr('r', 3.5).style('fill', dash.colors[0]);
+  const tp = ME.tip(el);
+  const guide = svg.append('line').attr('class', 'me-ref').attr('y1', 10).attr('y2', H - 26).style('opacity', 0);
+  const bis = d3.bisector((r) => ME.keyToUTC(r.day)).center;
+  svg.append('rect').attr('x', ml).attr('y', 0).attr('width', W - ml).attr('height', H - 26).style('fill', 'transparent')
+    .on('pointermove', (ev) => {
+      const [px, py] = d3.pointer(ev, el);
+      const r = rows[bis(rows, x.invert(px))];
+      guide.attr('x1', x(ME.keyToUTC(r.day))).attr('x2', x(ME.keyToUTC(r.day))).style('opacity', 1);
+      tp.show([ME.fmtDate.format(ME.keyToUTC(r.day)), `Aguda ${ME.fmtNum(r.aguda)} · Crónica ${ME.fmtNum(r.cronica)}`, `Cociente ${r.ratio != null ? ME.fmtNum(r.ratio, 2) : '—'} · Esfuerzo del día ${r.esfuerzo}`], px, py);
+    })
+    .on('pointerleave', () => { tp.hide(); guide.style('opacity', 0); });
+});
+
+dash.draw('chart-zones', (el) => {
+  const d = dash.data('zonas_semana');
+  if (!ME.status(el, d, 'las zonas de frecuencia cardíaca')) return;
+  const zones = ['Z1', 'Z2', 'Z3', 'Z4', 'Z5'];
+  const weeks = [...new Set(d.data.map((r) => r.semana))];
+  const table = weeks.map((w) => { const o = { semana: w }; for (const z of zones) o[z] = 0; for (const r of d.data) if (r.semana === w) o[r.zona] = r.horas; return o; });
+  const series = d3.stack().keys(zones)(table);
+  const W = el.clientWidth, H = 230, svg = meSvg(el, H, 'Horas de carrera por zona de frecuencia cardíaca en las últimas 6 semanas');
+  const y = d3.scaleLinear().domain([0, (d3.max(table, (o) => zones.reduce((s, z) => s + o[z], 0)) || 1) * 1.1]).nice().range([H - 26, 10]);
+  const ml = ME.textWidth(svg, y.ticks(4).map((v) => v + ' h')) + 10;
+  const x = d3.scaleBand().domain(weeks).range([ml, W - 4]).padding(0.3);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => v + ' h').tickSize(-(W - ml - 4))).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('transform', `translate(0,${H - 26})`).call(d3.axisBottom(x).tickFormat((s) => ME.fmtShort.format(ME.keyToUTC(s))).tickSizeOuter(0));
+  const tp = ME.tip(el);
+  svg.append('g').selectAll('g').data(series).join('g').style('fill', (s) => ME.ZONE_COLORS[zones.indexOf(s.key)])
+    .selectAll('rect').data((s) => s.map((p) => Object.assign(p, { z: s.key }))).join('rect')
+    .attr('x', (p) => x(p.data.semana)).attr('width', x.bandwidth()).attr('y', (p) => y(p[1])).attr('height', (p) => Math.max(0, y(p[0]) - y(p[1])))
+    .on('pointerenter pointermove', (ev, p) => {
+      const [px, py] = d3.pointer(ev, el);
+      const rows = d.data.filter((r) => r.semana === p.data.semana && r.horas > 0);
+      tp.show([`Semana del ${ME.fmtShort.format(ME.keyToUTC(p.data.semana))}`, ...rows.map((r) => `${r.zona}: ${ME.fmtNum(r.horas, 2)} h (${r.pct}%)`)], px, py);
+    })
+    .on('pointerleave', () => tp.hide());
+});
+
+dash.draw('chart-pace', (el) => {
+  const d = dash.data('activities');
+  if (!ME.status(el, d, 'tus carreras')) return;
+  const runs = d.data.filter((r) => r.categoria === 'Carrera' && r.pace_s_km >= 180 && r.pace_s_km <= 600 && r.distance_km >= 1);
+  if (!runs.length) return el.replaceChildren(ME.el('p', 'me-muted', 'No hay carreras en este periodo.'));
+  const W = el.clientWidth, H = 230, svg = meSvg(el, H, 'Ritmo medio de cada carrera a lo largo del tiempo');
+  const ext = d3.extent(runs, (r) => r.pace_s_km);
+  const y = d3.scaleLinear().domain([ext[1] + 15, ext[0] - 15]).range([H - 26, 12]);
+  const ml = ME.textWidth(svg, y.ticks(5).map(ME.fmtPace)) + 10;
+  const x = d3.scaleUtc().domain(d3.extent(runs, (r) => ME.keyToUTC(r.day))).range([ml + 8, W - 10]);
+  const rs = d3.scaleSqrt().domain([0, d3.max(runs, (q) => q.distance_km)]).range([0, W < 420 ? 8 : 11]);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(ME.fmtPace).tickSize(-(W - ml - 4))).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('transform', `translate(0,${H - 26})`).call(d3.axisBottom(x).ticks(W < 420 ? 3 : 6).tickFormat((t) => new Intl.DateTimeFormat('es', { month: 'short', timeZone: 'UTC' }).format(t)).tickSizeOuter(0));
+  const tp = ME.tip(el);
+  svg.append('g').selectAll('circle').data(runs).join('circle')
+    .attr('cx', (q) => x(ME.keyToUTC(q.day))).attr('cy', (q) => y(q.pace_s_km)).attr('r', (q) => Math.max(2.5, rs(q.distance_km)))
+    .style('fill', dash.colors[0]).style('fill-opacity', 0.55).style('stroke', dash.colors[0])
+    .on('pointerenter pointermove', (ev, q) => { const [px, py] = d3.pointer(ev, el); tp.show([`${ME.fmtShort.format(ME.keyToUTC(q.day))} · ${q.name}`, `${q.pace} · ${ME.fmtNum(q.distance_km, 2)} km`], px, py); })
+    .on('pointerleave', () => tp.hide());
+});
+
+dash.draw('chart-sports', (el) => {
+  const d = dash.data('deportes90');
+  if (!ME.status(el, d, 'el reparto por deporte')) return;
+  const rows = d.data;
+  if (!rows.length) return el.replaceChildren(ME.el('p', 'me-muted', 'Sin actividades en los últimos 90 días.'));
+  const W = el.clientWidth, bh = 26, H = rows.length * (bh + 10) + 10, svg = meSvg(el, H, 'Horas por deporte en los últimos 90 días');
+  const ml = ME.textWidth(svg, rows.map((q) => q.categoria)) + 12;
+  const labels = rows.map((q) => `${ME.fmtNum(q.horas)} h · ${q.sesiones}`);
+  const mr = ME.textWidth(svg, labels) + 10;
+  const x = d3.scaleLinear().domain([0, d3.max(rows, (q) => q.horas) || 1]).range([0, Math.max(40, W - ml - mr)]);
+  const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (_, i) => `translate(0,${10 + i * (bh + 10)})`);
+  g.append('text').attr('class', 'me-axl').attr('x', ml - 10).attr('y', bh / 2).attr('dy', '0.35em').attr('text-anchor', 'end').text((q) => q.categoria);
+  g.append('rect').attr('x', ml).attr('height', bh).attr('rx', 3).attr('width', (q) => Math.max(2, x(q.horas))).style('fill', (q) => ME.color(q.categoria));
+  g.append('text').attr('class', 'me-val').attr('x', (q) => ml + Math.max(2, x(q.horas)) + 6).attr('y', bh / 2).attr('dy', '0.35em').text((_, i) => labels[i]);
+});
+
+// ---------- Listas: objetivos y carreras ----------
+dash.draw('goals', (el) => {
+  const d = dash.data('metas_progreso');
+  document.querySelectorAll('#goals-empty').forEach((e) => { e.hidden = d.status !== 'ok' || d.data.length > 0; });
+  if (d.status !== 'ok') return el.replaceChildren();
+  el.replaceChildren(...d.data.map((g) => {
+    const li = ME.el('li', 'me-goal');
+    const top = ME.el('div', 'me-goal-top');
+    const name = ME.el('span', 'me-goal-name', g.titulo);
+    const x = ME.el('button', 'me-x', 'Quitar'); x.type = 'button'; x.style.marginLeft = '8px';
+    x.addEventListener('click', async () => { x.disabled = true; try { await ME.store.del('metas/items', g.id); } catch { x.disabled = false; ME.flash('meta', false); } });
+    name.appendChild(x);
+    const st = ME.el('span', 'me-goal-num ' + (g.estado === 'Atrasado' ? 'me-state-warn' : 'me-state-ok'), `${ME.fmtNum(g.actual, g.unidad === 'sesiones' ? 0 : 1)} de ${g.objetivo} ${g.unidad} · ${g.pct}% · ${g.estado}`);
+    top.append(name, st);
+    const bar = ME.el('div', 'me-bar');
+    const fill = ME.el('i'); fill.style.width = Math.min(100, g.pct) + '%'; fill.style.background = g.estado === 'Atrasado' ? 'var(--color-warn)' : dash.colors[0];
+    const mark = ME.el('b'); mark.style.left = `calc(${g.esperado}% - 1px)`; mark.title = `Esperado a hoy: ${g.esperado}%`;
+    bar.append(fill, mark);
+    li.append(top, bar);
+    return li;
+  }));
+});
+
+dash.draw('races', (el) => {
+  const d = dash.data('carreras_cd');
+  document.querySelectorAll('#races-empty').forEach((e) => { e.hidden = d.status !== 'ok' || d.data.length > 0; });
+  if (d.status !== 'ok') return el.replaceChildren();
+  el.replaceChildren(...d.data.map((c) => {
+    const li = ME.el('li', 'me-race');
+    const days = ME.el('div', 'me-race-days', c.dias < 0 ? '✓' : String(c.dias));
+    days.appendChild(ME.el('small', '', c.dias < 0 ? 'pasada' : c.dias === 1 ? 'día' : 'días'));
+    const mid = ME.el('div');
+    mid.append(ME.el('div', 'me-goal-name', c.nombre));
+    const meta = [`${ME.fmtDate.format(ME.keyToUTC(c.fecha))}`, `${ME.fmtNum(c.distancia_km, c.distancia_km % 1 ? 2 : 0)} km`];
+    if (c.objetivo) meta.push(`objetivo ${c.objetivo}`);
+    mid.append(ME.el('div', 'me-race-meta', meta.join(' · ')));
+    if (c.prediccion) mid.append(ME.el('div', 'me-race-meta', `Estimado: ${c.prediccion} (${c.ritmo_pred}) · según ${c.base}`));
+    const x = ME.el('button', 'me-x', 'Quitar'); x.type = 'button';
+    x.addEventListener('click', async () => { x.disabled = true; try { await ME.store.del('carreras/items', c.id); } catch { x.disabled = false; ME.flash('carrera', false); } });
+    li.append(days, mid, x);
+    return li;
+  }));
+});
+
+// ---------- Tablas ----------
+const meRowsTo = (el, rows, cellsOf) => el.replaceChildren(...rows.map((r) => {
+  const tr = document.createElement('tr'); if (r.id != null) tr.dataset.key = r.id;
+  tr.append(...cellsOf(r).map(([v, cls]) => ME.el('td', cls || '', v)));
+  return tr;
+}));
+
+dash.draw('fondos', (el) => {
+  const d = dash.data('fondos');
+  if (d.status !== 'ok') return el.replaceChildren();
+  meRowsTo(el, d.data, (r) => [[r.day], [r.name, 'me-wrap'], [Number(r.distance_km).toFixed(2), 'me-num'], [r.pace || '—', 'me-num'], [r.fc_media != null ? String(r.fc_media) : '—', 'me-num'], [String(r.elevation_m), 'me-num'], [r.relative_effort != null ? String(r.relative_effort) : '—', 'me-num']]);
+});
+
+dash.draw('recent', (el) => {
+  const d = dash.data('act_f');
+  if (d.status !== 'ok') return el.replaceChildren();
+  meRowsTo(el, d.data.slice(0, 12), (r) => [[r.day], [r.name, 'me-wrap'], [ME.hasDist(r) ? Number(r.distance_km).toFixed(2) : '—', 'me-num'], [r.duracion, 'me-num'], [r.pace || '—', 'me-num']]);
+});
+</script>
+
+<script>
+// ================= ÚLTIMO ENTRENAMIENTO =================
+// ---------- Cargadores ----------
+dash.loader('sesion', {
+  description: 'Toma de Strava el resumen de rendimiento del entrenamiento elegido: FC media y máxima, potencia, cadencia y calorías.',
+  fn: ({ answer, args }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió el entrenamiento');
+    const r = (x) => (x == null ? null : Math.round(x));
+    return [{ activity_id: String(args.activity_id), deporte: answer.sport_type || '', tiene_fc: !!answer.has_heartrate, tiene_potencia: !!answer.has_device_watts, fc_media: answer.has_heartrate ? r(answer.average_heartrate) : null, fc_max: answer.has_heartrate ? r(answer.max_heartrate) : null, vatios_media: answer.has_device_watts ? r(answer.average_watts) : null, cadencia: r(answer.average_cadence), calorias: r(answer.calories), esfuerzo_percibido: answer.perceived_exertion != null ? answer.perceived_exertion : null }];
+  }
+});
+
+dash.loader('sesion_vueltas', {
+  description: 'Una fila por vuelta del entrenamiento elegido. Convierte metros a km, m/s a km/h y a ritmo por km, y redondea la FC.',
+  fn: ({ answer }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió las vueltas');
+    const p = (n) => String(n).padStart(2, '0');
+    const mmss = (s) => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60; return h ? `${h}:${p(m)}:${p(x)}` : `${m}:${p(x)}`; };
+    const run = ['Run', 'TrailRun', 'VirtualRun', 'Walk', 'Hike'].includes(answer.sport_type);
+    return (answer.laps || []).map((l, i) => {
+      const v = l.avg_speed || 0;
+      return { vuelta: i + 1, distancia_km: Math.round((l.distance || 0) / 10) / 100, tiempo_s: l.moving_time || 0, tiempo: mmss(l.moving_time || 0), ritmo_s_km: run && v > 0.3 ? Math.round(1000 / v) : null, ritmo: run && v > 0.3 ? mmss(1000 / v) + ' /km' : '', vel_kmh: v ? Math.round(v * 36) / 10 : null, fc_media: l.avg_hr != null ? Math.round(l.avg_hr) : null, fc_max: l.max_hr != null ? Math.round(l.max_hr) : null, vatios: l.avg_watts != null ? Math.round(l.avg_watts) : null, desnivel_m: l.elevation_gain != null ? Math.round(l.elevation_gain) : null };
+    });
+  }
+});
+
+dash.loader('sesion_marcas', {
+  description: 'Los mejores esfuerzos que Strava encontró dentro del entrenamiento elegido, con nombre en español.',
+  fn: ({ answer }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió los esfuerzos');
+    const p = (n) => String(n).padStart(2, '0');
+    const fmt = (s) => { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = Math.round(s % 60); return h ? `${h}:${p(m)}:${p(x)}` : `${m}:${p(x)}`; };
+    const es = (t) => String(t || '').replace('1/2 mile', '1/2 milla').replace(/\bmile\b/, 'milla').replace(/\bsec\b/, 's').replace(/\bhr\b/, 'h');
+    return (answer.best_efforts || []).map((e) => ({ esfuerzo: es(e.display_text || e.name), valor: e.unit === 'seconds' ? fmt(e.value) : e.unit === 'watts' ? `${e.value} W` : `${e.value} ${e.unit || ''}`.trim(), unidad: e.unit || '' }));
+  }
+});
+
+dash.loader('sesion_curva', {
+  description: 'Convierte las series de Strava (hasta 300 puntos) en filas: tiempo en minutos, distancia en km, FC, velocidad en km/h, altitud y potencia.',
+  fn: ({ answer }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió las series');
+    const t = answer.time || [], n = t.length;
+    const rows = [];
+    for (let i = 0; i < n; i++) {
+      rows.push({ min: Math.round(t[i] / 6) / 10, t_s: t[i], dist_km: answer.distance ? Math.round(answer.distance[i]) / 1000 : null, fc: answer.heart_rate ? answer.heart_rate[i] : null, vel_kmh: answer.velocity_smooth ? Math.round(answer.velocity_smooth[i] * 36) / 10 : null, alt_m: answer.altitude ? answer.altitude[i] : null, vatios: answer.watts ? answer.watts[i] : null });
+    }
+    return { rows, columns: ['min', 't_s', 'dist_km', 'fc', 'vel_kmh', 'alt_m', 'vatios'] };
+  }
+});
+
+// ---------- Cálculos ----------
+dash.calc('sesion_zonas', {
+  inputs: ['sesion_curva', 'zonas_fc'],
+  title: 'Zonas de FC de la sesión',
+  description: 'Minutos de la sesión en cada zona de FC, sumando el tiempo entre puntos de la serie (huecos de más de 30 s se cuentan como 30 s).',
+  fn: (curva, zonas) => {
+    const sec = zonas.map(() => 0);
+    for (let i = 1; i < curva.length; i++) {
+      const h = Number(curva[i].fc);
+      if (!h) continue;
+      const dt = Math.min(30, Math.max(0, curva[i].t_s - curva[i - 1].t_s));
+      let z = 0;
+      for (let k = zonas.length - 1; k >= 0; k--) if (h >= Number(zonas[k].min)) { z = k; break; }
+      sec[z] += dt;
+    }
+    const tot = sec.reduce((a, b) => a + b, 0);
+    return zonas.map((zz, k) => ({ zona: zz.zona, minutos: Math.round(sec[k] / 6) / 10, pct: tot ? Math.round(sec[k] / tot * 100) : 0 }));
+  }
+});
+
+dash.calc('sesion_lectura', {
+  inputs: ['activities', 'sesion', 'sesion_curva', 'sesion_zonas'],
+  title: 'Lectura del entrenamiento',
+  description: 'Compara la sesión con la media de tus 10 sesiones anteriores del mismo deporte, compara las dos mitades (ritmo y desacople FC-velocidad) y resume el tiempo en zonas altas.',
+  fn: (activities, sesion, curva, zonasSesion) => {
+    const id = String(dash.params().actividad || '');
+    const act = activities.find((r) => r.id === id);
+    if (!act) return [];
+    const p = (n) => String(n).padStart(2, '0');
+    const pace = (s) => `${Math.floor(s / 60)}:${p(Math.round(s % 60))} /km`;
+    const num = (x, d = 1) => Number(x).toLocaleString('es', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const isRun = act.categoria === 'Carrera';
+    const out = [];
+    const prev = activities.filter((r) => r.categoria === act.categoria && r.start_local < act.start_local).slice(0, 10);
+    const avg = (arr, f) => { const v = arr.map(f).filter((x) => x != null && isFinite(x) && x > 0); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+    if (prev.length >= 3) {
+      const cat = act.categoria.toLowerCase();
+      const dAvg = avg(prev, (r) => Number(r.distance_km));
+      if (dAvg && Number(act.distance_km) > 0.1) {
+        const diff = Math.round((act.distance_km - dAvg) / dAvg * 100);
+        out.push({ tono: 'info', texto: `Distancia ${num(act.distance_km)} km, ${Math.abs(diff) < 5 ? 'similar a' : diff > 0 ? `un ${diff} % más que` : `un ${-diff} % menos que`} tu media de las últimas ${prev.length} sesiones de ${cat} (${num(dAvg)} km).` });
+      } else {
+        const tAvg = avg(prev, (r) => Number(r.moving_s));
+        if (tAvg) { const diff = Math.round((act.moving_s - tAvg) / tAvg * 100); out.push({ tono: 'info', texto: `Duración ${Math.round(act.moving_s / 60)} min, ${Math.abs(diff) < 5 ? 'similar a' : diff > 0 ? `un ${diff} % más que` : `un ${-diff} % menos que`} tu media reciente de ${cat} (${Math.round(tAvg / 60)} min).` }); }
+      }
+      if (isRun && act.pace_s_km) {
+        const pAvg = avg(prev, (r) => Number(r.pace_s_km));
+        if (pAvg) { const d = Math.round(act.pace_s_km - pAvg); out.push({ tono: d <= 0 ? 'ok' : 'info', texto: `Ritmo medio ${pace(act.pace_s_km)}: ${Math.abs(d) < 3 ? 'igual que' : d < 0 ? `${-d} s/km más rápido que` : `${d} s/km más lento que`} tu media reciente (${pace(pAvg)}).` }); }
+      }
+      const eAvg = avg(prev, (r) => Number(r.relative_effort));
+      if (eAvg && act.relative_effort != null) { const diff = Math.round((act.relative_effort - eAvg) / eAvg * 100); out.push({ tono: diff > 40 ? 'warn' : 'info', texto: `Esfuerzo relativo ${act.relative_effort}, ${Math.abs(diff) < 10 ? 'en línea con' : diff > 0 ? `un ${diff} % por encima de` : `un ${-diff} % por debajo de`} lo habitual (${Math.round(eAvg)}).` }); }
+    }
+    const pts = curva.filter((c) => c.t_s != null);
+    if (pts.length > 20) {
+      const half = pts[pts.length - 1].t_s / 2;
+      const a = pts.filter((c) => c.t_s <= half), b = pts.filter((c) => c.t_s > half);
+      const mean = (arr, f) => { const v = arr.map(f).filter((x) => x != null && x > 0); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null; };
+      const v1 = mean(a, (c) => c.vel_kmh), v2 = mean(b, (c) => c.vel_kmh), h1 = mean(a, (c) => c.fc), h2 = mean(b, (c) => c.fc);
+      if (isRun && v1 && v2) {
+        const d = Math.round(3600 / v2 - 3600 / v1);
+        out.push({ tono: d <= 0 ? 'ok' : Math.abs(d) > 20 ? 'warn' : 'info', texto: `Primera mitad a ${pace(3600 / v1)} y segunda a ${pace(3600 / v2)}: ${Math.abs(d) < 3 ? 'ritmo parejo' : d < 0 ? `split negativo, terminaste ${-d} s/km más rápido` : `bajaste ${d} s/km en la segunda mitad`}.` });
+      }
+      if (v1 && v2 && h1 && h2 && pts[pts.length - 1].t_s >= 1200) {
+        const drift = Math.round(((v1 / h1) - (v2 / h2)) / (v1 / h1) * 1000) / 10;
+        out.push({ tono: drift < 5 ? 'ok' : 'warn', texto: `Desacople FC-velocidad de ${num(drift)} %: ${drift < 5 ? 'la FC se mantuvo estable para la velocidad que llevabas, buena señal de base aeróbica (menos de 5 %).' : 'la FC subió más que la velocidad en la segunda mitad; suele indicar fatiga, calor, poca hidratación o un ritmo por encima de tu base aeróbica.'}` });
+      }
+      if (h1 && h2) out.push({ tono: 'info', texto: `FC media de ${Math.round(h1)} lpm en la primera mitad y ${Math.round(h2)} lpm en la segunda.` });
+    }
+    const z45 = zonasSesion.filter((z) => z.zona === 'Z4' || z.zona === 'Z5').reduce((s, z) => s + z.pct, 0);
+    const zTot = zonasSesion.reduce((s, z) => s + z.minutos, 0);
+    if (zTot > 0) out.push({ tono: z45 > 50 ? 'warn' : 'info', texto: `${z45} % del tiempo en zonas 4–5${z45 > 50 ? '. Fue una sesión exigente: conviene que la siguiente sea suave.' : '.'}` });
+    const s = sesion[0];
+    if (s && s.vatios_media) out.push({ tono: 'info', texto: `Potencia media ${s.vatios_media} W.` });
+    return out.map((r, i) => ({ orden: i + 1, ...r }));
+  }
+});
+
+// ---------- Elegir el entrenamiento ----------
+window.meSesionPicked = false;
+dash.onData(() => {
+  if (window.meSesionPicked) return;
+  const a = dash.data('activities');
+  if (a.status !== 'ok' || !a.data.length) return;
+  const latest = a.data.find((r) => r.categoria !== 'Movilidad') || a.data[0];
+  if (String(dash.params().actividad) !== latest.id) dash.setParams({ actividad: latest.id });
+});
+
+dash.draw('s-select', (sel) => {
+  const a = dash.data('activities');
+  const list = a.status === 'ok' ? a.data.slice(0, 25) : [];
+  sel.replaceChildren(...list.map((r) => new Option(`${ME.fmtShort.format(ME.keyToUTC(r.day))} · ${r.name}${ME.hasDist(r) ? ' · ' + ME.fmtNum(r.distance_km) + ' km' : ''}`, r.id)));
+  sel.value = String(dash.params().actividad || '');
+  sel.onchange = () => { window.meSesionPicked = true; dash.setParams({ actividad: sel.value }); };
+});
+
+const meAct = () => { const a = dash.data('activities'); const id = String(dash.params().actividad || ''); return a.status === 'ok' ? a.data.find((r) => r.id === id) : null; };
+
+dash.draw('s-name', (el) => {
+  const r = meAct();
+  el.replaceChildren();
+  if (!r) return el.append('—');
+  const a = ME.el('a', '', r.name); a.href = 'https://www.strava.com/activities/' + encodeURIComponent(r.id); a.target = '_blank'; a.rel = 'noopener';
+  a.style.color = 'inherit'; a.style.textDecoration = 'none';
+  el.appendChild(a);
+});
+dash.draw('s-when', (el) => {
+  const r = meAct();
+  el.textContent = r ? `${ME.fmtLong.format(ME.keyToUTC(r.day))} · ${r.start_local.slice(11, 16)} · ${r.categoria}${r.location ? ' · ' + r.location : ''}` : '—';
+});
+dash.draw('s-curve-label', (el) => { const r = meAct(); el.textContent = r && r.categoria === 'Carrera' ? 'Ritmo' : 'Velocidad'; });
+
+dash.draw('s-stats', (el) => {
+  const r = meAct(), sd = dash.data('sesion');
+  const s = sd.status === 'ok' && sd.data[0] ? sd.data[0] : null;
+  if (!r) return el.replaceChildren(ME.el('p', 'me-muted', '—'));
+  const items = [];
+  const add = (label, value, unit, src, field, rowAttr) => {
+    if (value == null || value === '') return;
+    const box = ME.el('div', 'me-stat');
+    const v = ME.el('span', 'me-stat-v', String(value));
+    if (src) { v.dataset.source = src; v.dataset.field = field; if (rowAttr) v.dataset.where = rowAttr; else v.dataset.row = '0'; }
+    if (unit) v.appendChild(ME.el('span', 'me-kpi-unit', unit));
+    box.append(ME.el('span', 'me-stat-l', label), v);
+    items.push(box);
+  };
+  const where = 'id=' + encodeURIComponent(r.id);
+  if (ME.hasDist(r)) add('Distancia', ME.fmtNum(r.distance_km, 2), 'km', 'activities', 'distance_km', where);
+  add('Tiempo en movimiento', r.duracion, '', 'activities', 'duracion', where);
+  if (r.pace) add(r.categoria === 'Natación' ? 'Ritmo /100 m' : 'Ritmo medio', r.pace.replace(/ \/(km|100m)$/, ''), r.categoria === 'Natación' ? '/100 m' : '/km', 'activities', 'pace', where);
+  else if (ME.hasDist(r) && r.moving_s) add('Velocidad media', ME.fmtNum(r.distance_km / (r.moving_s / 3600)), 'km/h');
+  if (s && s.fc_media != null) add('FC media', s.fc_media, 'lpm', 'sesion', 'fc_media');
+  if (s && s.fc_max != null) add('FC máxima', s.fc_max, 'lpm', 'sesion', 'fc_max');
+  if (s && s.vatios_media != null) add('Potencia media', s.vatios_media, 'W', 'sesion', 'vatios_media');
+  if (r.elevation_m > 0) add('Desnivel', Math.round(r.elevation_m), 'm', 'activities', 'elevation_m', where);
+  if (r.relative_effort != null) add('Esfuerzo relativo', r.relative_effort, '', 'activities', 'relative_effort', where);
+  if (r.calories != null) add('Calorías', r.calories, 'kcal', 'activities', 'calories', where);
+  if (s && s.cadencia) add(r.categoria === 'Carrera' ? 'Cadencia (pasos/min)' : 'Cadencia', r.categoria === 'Carrera' ? s.cadencia * 2 : s.cadencia, r.categoria === 'Carrera' ? 'ppm' : 'rpm');
+  el.replaceChildren(...items);
+});
+
+dash.draw('s-lectura', (el) => {
+  const d = dash.data('sesion_lectura');
+  if (!ME.status(el, d, 'la lectura del entrenamiento')) return;
+  if (!d.data.length) return el.replaceChildren(ME.el('li', 'me-empty', 'No hay suficientes datos para comparar esta sesión.'));
+  el.replaceChildren(...d.data.map((r) => { const li = ME.el('li', 'me-read is-' + r.tono); li.append(ME.el('i', 'me-read-mark'), ME.el('span', '', r.texto)); return li; }));
+});
+
+// ---------- Gráficos de la sesión ----------
+const meSvg = (el, H, label) => { el.replaceChildren(); return d3.select(el).append('svg').attr('width', '100%').attr('height', H).attr('viewBox', `0 0 ${el.clientWidth} ${H}`).attr('role', 'img').attr('aria-label', label); };
+const meZoneIdx = (h) => { const z = dash.data('zonas_fc'); if (z.status !== 'ok') return 0; for (let k = z.data.length - 1; k >= 0; k--) if (h >= Number(z.data[k].min)) return k; return 0; };
+
+dash.draw('chart-s-curve', (el) => {
+  const d = dash.data('sesion_curva');
+  if (!ME.status(el, d, 'las series del entrenamiento')) return;
+  const r = meAct();
+  const isRun = r && r.categoria === 'Carrera';
+  const useDist = d.data.some((c) => c.dist_km > 0.2) && r && ME.hasDist(r);
+  const pts = d.data.filter((c) => c.fc || c.vel_kmh);
+  if (pts.length < 5) return el.replaceChildren(ME.el('p', 'me-muted', 'Esta sesión no tiene series de FC ni velocidad.'));
+  const xv = (c) => (useDist ? c.dist_km : c.min);
+  const W = el.clientWidth, H = 260;
+  const svg = meSvg(el, H, 'Frecuencia cardíaca y velocidad a lo largo de la sesión');
+  const hrPts = pts.filter((c) => c.fc > 40);
+  const spd = pts.map((c) => ({ x: xv(c), v: isRun ? (c.vel_kmh > 3 ? 3600 / c.vel_kmh : null) : c.vel_kmh })).filter((c) => c.v != null);
+  // suavizado simple de 5 puntos para la velocidad
+  const sm = spd.map((c, i) => { const w = spd.slice(Math.max(0, i - 2), i + 3); return { x: c.x, v: w.reduce((s, q) => s + q.v, 0) / w.length }; });
+  const hrExt = d3.extent(hrPts, (c) => c.fc);
+  const yH = d3.scaleLinear().domain([Math.max(40, (hrExt[0] || 60) - 5), (hrExt[1] || 180) + 5]).nice().range([H - 26, 10]);
+  let yS;
+  if (isRun) { const e = d3.extent(sm, (c) => c.v); yS = d3.scaleLinear().domain([Math.min(600, e[1] + 10), Math.max(150, e[0] - 10)]).range([H - 26, 10]); }
+  else yS = d3.scaleLinear().domain([0, (d3.max(sm, (c) => c.v) || 30) * 1.1]).nice().range([H - 26, 10]);
+  const ml = ME.textWidth(svg, yH.ticks(4).map(String)) + 10;
+  const sFmt = isRun ? ME.fmtPace : (v) => String(Math.round(v));
+  const mr = ME.textWidth(svg, yS.ticks(4).map(sFmt)) + 10;
+  const x = d3.scaleLinear().domain(d3.extent(pts, xv)).range([ml, W - mr]);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(yH).ticks(4).tickSize(-(W - ml - mr))).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('transform', `translate(${W - mr},0)`).call(d3.axisRight(yS).ticks(4).tickFormat(sFmt).tickSize(0)).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('transform', `translate(0,${H - 26})`).call(d3.axisBottom(x).ticks(W < 420 ? 4 : 8).tickFormat((v) => useDist ? `${v} km` : `${v} min`).tickSizeOuter(0));
+  if (sm.length) svg.append('path').datum(sm).attr('d', d3.line().x((c) => x(c.x)).y((c) => yS(c.v))).style('fill', 'none').style('stroke', dash.colors[1 % dash.colors.length]).style('stroke-width', 1.75);
+  if (hrPts.length) svg.append('path').datum(hrPts).attr('d', d3.line().x((c) => x(xv(c))).y((c) => yH(c.fc))).style('fill', 'none').style('stroke', dash.colors[0]).style('stroke-width', 2);
+  const tp = ME.tip(el);
+  const guide = svg.append('line').attr('class', 'me-ref').attr('y1', 10).attr('y2', H - 26).style('opacity', 0);
+  const bis = d3.bisector(xv).center;
+  svg.append('rect').attr('x', ml).attr('y', 0).attr('width', Math.max(0, W - ml - mr)).attr('height', H - 26).style('fill', 'transparent')
+    .on('pointermove', (ev) => {
+      const [px, py] = d3.pointer(ev, el);
+      const c = pts[bis(pts, x.invert(px))];
+      guide.attr('x1', x(xv(c))).attr('x2', x(xv(c))).style('opacity', 1);
+      const lines = [useDist ? `Km ${ME.fmtNum(c.dist_km, 2)} · min ${ME.fmtNum(c.min)}` : `Minuto ${ME.fmtNum(c.min)}`];
+      if (c.fc) lines.push(`FC ${c.fc} lpm`);
+      if (c.vel_kmh) lines.push(isRun && c.vel_kmh > 3 ? `Ritmo ${ME.fmtPace(3600 / c.vel_kmh)} /km` : `${ME.fmtNum(c.vel_kmh)} km/h`);
+      if (c.vatios != null) lines.push(`${c.vatios} W`);
+      if (c.alt_m != null) lines.push(`Altitud ${Math.round(c.alt_m)} m`);
+      tp.show(lines, px, py);
+    })
+    .on('pointerleave', () => { tp.hide(); guide.style('opacity', 0); });
+});
+
+dash.draw('chart-s-laps', (el) => {
+  const d = dash.data('sesion_vueltas');
+  if (!ME.status(el, d, 'las vueltas')) return;
+  const laps = d.data.filter((l) => l.tiempo_s > 0 && l.fc_media != null);
+  if (!laps.length) return el.replaceChildren(ME.el('p', 'me-muted', 'Las vueltas de esta sesión no tienen FC.'));
+  const W = el.clientWidth, H = 230, svg = meSvg(el, H, 'FC media de cada vuelta');
+  const tot = laps.reduce((s, l) => s + l.tiempo_s, 0);
+  const y = d3.scaleLinear().domain([Math.max(60, d3.min(laps, (l) => l.fc_media) - 15), d3.max(laps, (l) => l.fc_media) + 5]).nice().range([H - 26, 10]);
+  const ml = ME.textWidth(svg, y.ticks(4).map(String)) + 10;
+  const x = d3.scaleLinear().domain([0, tot / 60]).range([ml, W - 4]);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(W - ml - 4))).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('transform', `translate(0,${H - 26})`).call(d3.axisBottom(x).ticks(W < 420 ? 4 : 7).tickFormat((v) => `${v} min`).tickSizeOuter(0));
+  let acc = 0;
+  const bars = laps.map((l) => { const b = { ...l, x0: acc / 60, x1: (acc + l.tiempo_s) / 60 }; acc += l.tiempo_s; return b; });
+  const tp = ME.tip(el);
+  svg.append('g').selectAll('rect').data(bars).join('rect')
+    .attr('x', (b) => x(b.x0) + 0.5).attr('width', (b) => Math.max(1, x(b.x1) - x(b.x0) - 1)).attr('y', (b) => y(b.fc_media)).attr('height', (b) => y.range()[0] - y(b.fc_media))
+    .style('fill', (b) => ME.ZONE_COLORS[meZoneIdx(b.fc_media)])
+    .on('pointerenter pointermove', (ev, b) => {
+      const [px, py] = d3.pointer(ev, el);
+      const lines = [`Vuelta ${b.vuelta} · ${b.tiempo}${b.distancia_km ? ' · ' + ME.fmtNum(b.distancia_km, 2) + ' km' : ''}`, `FC ${b.fc_media} lpm (máx. ${b.fc_max ?? '—'}) · Z${meZoneIdx(b.fc_media) + 1}`];
+      if (b.ritmo) lines.push(`Ritmo ${b.ritmo}`); else if (b.vel_kmh) lines.push(`${ME.fmtNum(b.vel_kmh)} km/h`);
+      if (b.vatios != null) lines.push(`${b.vatios} W`);
+      tp.show(lines, px, py);
+    })
+    .on('pointerleave', () => tp.hide());
+});
+
+dash.draw('chart-s-zones', (el) => {
+  const d = dash.data('sesion_zonas');
+  if (!ME.status(el, d, 'las zonas de la sesión')) return;
+  const rows = d.data;
+  if (!rows.some((r) => r.minutos > 0)) return el.replaceChildren(ME.el('p', 'me-muted', 'Esta sesión no tiene datos de FC.'));
+  const W = el.clientWidth, bh = 26, H = rows.length * (bh + 10) + 10, svg = meSvg(el, H, 'Minutos en cada zona de FC durante la sesión');
+  const ml = ME.textWidth(svg, rows.map((r) => r.zona)) + 12;
+  const labels = rows.map((r) => `${ME.fmtNum(r.minutos)} min · ${r.pct} %`);
+  const mr = ME.textWidth(svg, labels) + 10;
+  const x = d3.scaleLinear().domain([0, d3.max(rows, (r) => r.minutos) || 1]).range([0, Math.max(40, W - ml - mr)]);
+  const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (_, i) => `translate(0,${10 + i * (bh + 10)})`);
+  g.append('text').attr('class', 'me-axl').attr('x', ml - 10).attr('y', bh / 2).attr('dy', '0.35em').attr('text-anchor', 'end').text((r) => r.zona);
+  g.append('rect').attr('x', ml).attr('height', bh).attr('rx', 3).attr('width', (r) => Math.max(r.minutos ? 2 : 0, x(r.minutos))).style('fill', (_, i) => ME.ZONE_COLORS[i]);
+  g.append('text').attr('class', 'me-val').attr('x', (r) => ml + Math.max(2, x(r.minutos)) + 6).attr('y', bh / 2).attr('dy', '0.35em').text((_, i) => labels[i]);
+});
+
+dash.draw('s-laps-table', (el) => {
+  const d = dash.data('sesion_vueltas');
+  if (d.status !== 'ok') return el.replaceChildren();
+  const show = (v) => (v == null || v === '' ? '—' : String(v));
+  el.replaceChildren(...d.data.map((l) => {
+    const tr = document.createElement('tr');
+    tr.append(...[[l.vuelta], [l.distancia_km != null ? l.distancia_km.toFixed(2) : '—'], [l.tiempo], [show(l.ritmo)], [l.vel_kmh != null ? l.vel_kmh.toFixed(1) : '—'], [show(l.fc_media)], [show(l.fc_max)], [show(l.vatios)], [show(l.desnivel_m)]].map(([v]) => ME.el('td', 'me-num', String(v))));
+    return tr;
+  }));
+});
+
+dash.draw('s-marcas', (el) => {
+  const d = dash.data('sesion_marcas');
+  document.querySelectorAll('#s-marcas-empty').forEach((e) => { e.hidden = d.status !== 'ok' || d.data.length > 0; });
+  if (d.status !== 'ok') return el.replaceChildren();
+  el.replaceChildren(...d.data.map((m, i) => {
+    const p = ME.el('span', 'me-pill');
+    const v = ME.el('b', '', m.valor); v.dataset.source = 'sesion_marcas'; v.dataset.field = 'valor'; v.dataset.row = String(i);
+    p.append(ME.el('span', 'me-muted', m.esfuerzo), v);
+    return p;
+  }));
+});
+</script>
+
+<script>
+// ================= MÁS ANÁLISIS =================
+// ---------- Cargadores ----------
+dash.loader('records_anio', {
+  description: 'Mejores tiempos de carrera por año (1 km, 5 km, 10 km y media maratón), con nombre en español y distancia en metros.',
+  fn: ({ answer }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió récords');
+    const names = { Fastest1k: '1 km', Fastest5k: '5 km', Fastest10k: '10 km', FastestHalfMarathon: 'Media maratón' };
+    const meters = { Fastest1k: 1000, Fastest5k: 5000, Fastest10k: 10000, FastestHalfMarathon: 21097.5 };
+    return (answer.efforts || []).map((e) => ({ prueba: names[e.best_effort_type] || e.best_effort_type, anio: e.year, segundos: e.value, metros: meters[e.best_effort_type] || null, fecha: e.date, activity_id: String(e.activity_id) }));
+  }
+});
+
+dash.loader('potencia_anio', {
+  description: 'Mejor potencia media de 1, 5 y 20 minutos por año, en bici real y virtual.',
+  fn: ({ answer }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió potencias');
+    const names = { GreatestPower1min: '1 min', GreatestPower5min: '5 min', GreatestPower20min: '20 min' };
+    return (answer.efforts || []).map((e) => ({ esfuerzo: names[e.best_effort_type] || e.best_effort_type, deporte: e.sport, anio: e.year, vatios: e.value, fecha: e.date }));
+  }
+});
+
+dash.loader('comp_resumen', {
+  description: 'Resumen de rendimiento del entrenamiento con el que comparas: FC media y máxima, potencia.',
+  fn: ({ answer, args }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió el entrenamiento');
+    const r = (x) => (x == null ? null : Math.round(x));
+    return [{ activity_id: String(args.activity_id), fc_media: answer.has_heartrate ? r(answer.average_heartrate) : null, fc_max: answer.has_heartrate ? r(answer.max_heartrate) : null, vatios_media: answer.has_device_watts ? r(answer.average_watts) : null }];
+  }
+});
+
+dash.loader('comp_curva', {
+  description: 'Series del entrenamiento con el que comparas (hasta 300 puntos): minutos, km, FC y velocidad en km/h.',
+  fn: ({ answer }) => {
+    if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió las series');
+    const t = answer.time || [];
+    return { rows: t.map((s, i) => ({ min: Math.round(s / 6) / 10, t_s: s, dist_km: answer.distance ? Math.round(answer.distance[i]) / 1000 : null, fc: answer.heart_rate ? answer.heart_rate[i] : null, vel_kmh: answer.velocity_smooth ? Math.round(answer.velocity_smooth[i] * 36) / 10 : null })), columns: ['min', 't_s', 'dist_km', 'fc', 'vel_kmh'] };
+  }
+});
+
+// ---------- Cálculos ----------
+dash.calc('semana_resumen', {
+  inputs: ['act_f'],
+  title: 'Esta semana y la anterior',
+  description: 'Km corriendo, horas y sesiones de esta semana (lunes a hoy) y de la semana pasada, y la sesión con más Esfuerzo relativo de esta semana.',
+  fn: (acts) => {
+    const DAY = 86400000, now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const mon = today - ((new Date(today).getUTCDay() + 6) % 7) * DAY;
+    const k = (t) => new Date(t).toISOString().slice(0, 10);
+    const a = k(mon), b = k(today), pa = k(mon - 7 * DAY), pb = k(mon - DAY);
+    const sum = (from, to) => {
+      let km = 0, s = 0, n = 0, dura = null;
+      for (const r of acts) {
+        if (!r.day || r.day < from || r.day > to) continue;
+        n++; s += Number(r.moving_s) || 0;
+        if (r.categoria === 'Carrera') km += Number(r.distance_km) || 0;
+        if (r.relative_effort != null && (!dura || r.relative_effort > dura.relative_effort)) dura = r;
+      }
+      return { km: Math.round(km * 10) / 10, horas: Math.round(s / 360) / 10, n, dura };
+    };
+    const t = sum(a, b), p = sum(pa, pb);
+    return [{ km: t.km, km_ant: p.km, horas: t.horas, horas_ant: p.horas, sesiones: t.n, sesiones_ant: p.n, dura_nombre: t.dura ? t.dura.name : null, dura_esfuerzo: t.dura ? t.dura.relative_effort : null, dura_id: t.dura ? t.dura.id : null }];
+  }
+});
+
+dash.calc('dias_anio', {
+  inputs: ['act_f'],
+  title: 'Minutos por día, último año',
+  description: 'Minutos en movimiento, Esfuerzo relativo y sesiones de cada día con actividad en las últimas 52 semanas.',
+  fn: (acts) => {
+    const now = new Date();
+    const from = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - 371 * 86400000).toISOString().slice(0, 10);
+    const acc = {};
+    for (const r of acts) {
+      if (!r.day || r.day < from) continue;
+      const a = acc[r.day] || (acc[r.day] = { day: r.day, minutos: 0, esfuerzo: 0, sesiones: 0 });
+      a.minutos += (Number(r.moving_s) || 0) / 60; a.esfuerzo += Number(r.relative_effort) || 0; a.sesiones++;
+    }
+    return Object.values(acc).map((a) => ({ ...a, minutos: Math.round(a.minutos) })).sort((x, y) => x.day.localeCompare(y.day));
+  }
+});
+
+dash.calc('eficiencia', {
+  inputs: ['activities', 'hr'],
+  title: 'Eficiencia aeróbica por carrera',
+  description: 'Metros por latido = velocidad media (m/min) ÷ FC media, en carreras de 4 km o más con FC.',
+  fn: (activities, hr) => {
+    const fc = {};
+    for (const l of hr) if (l.run_avg_hr) fc[l.activity_id] = Number(l.run_avg_hr);
+    return activities.filter((r) => r.categoria === 'Carrera' && Number(r.distance_km) >= 4 && Number(r.moving_s) > 0 && fc[r.id])
+      .map((r) => ({ id: r.id, day: r.day, name: r.name, fc_media: fc[r.id], pace: r.pace, metros_latido: Math.round((r.distance_km * 1000) / (r.moving_s / 60) / fc[r.id] * 1000) / 1000 }))
+      .sort((a, b) => a.day.localeCompare(b.day));
+  }
+});
+
+dash.calc('eficiencia_semana', {
+  inputs: ['eficiencia'],
+  title: 'Eficiencia aeróbica por semana',
+  description: 'Media semanal (lunes a domingo) de los metros por latido de tus carreras.',
+  fn: (ef) => {
+    const DAY = 86400000, acc = {};
+    for (const r of ef) {
+      const [y, m, d] = r.day.split('-').map(Number);
+      const t = Date.UTC(y, m - 1, d), mon = new Date(t - ((new Date(t).getUTCDay() + 6) % 7) * DAY).toISOString().slice(0, 10);
+      (acc[mon] = acc[mon] || []).push(r.metros_latido);
+    }
+    return Object.entries(acc).map(([semana, v]) => ({ semana, metros_latido: Math.round(v.reduce((a, b) => a + b, 0) / v.length * 1000) / 1000, carreras: v.length })).sort((a, b) => a.semana.localeCompare(b.semana));
+  }
+});
+
+dash.calc('eficiencia_resumen', {
+  inputs: ['eficiencia'],
+  title: 'Cambio de eficiencia',
+  description: 'Media de metros por latido de los últimos 28 días frente a los 56 días anteriores.',
+  fn: (ef) => {
+    const DAY = 86400000, now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const k = (t) => new Date(t).toISOString().slice(0, 10);
+    const a = k(today - 27 * DAY), b = k(today - 83 * DAY);
+    const mean = (v) => (v.length ? v.reduce((s, x) => s + x, 0) / v.length : null);
+    const rec = mean(ef.filter((r) => r.day >= a).map((r) => r.metros_latido));
+    const prev = mean(ef.filter((r) => r.day >= b && r.day < a).map((r) => r.metros_latido));
+    return [{ reciente: rec != null ? Math.round(rec * 100) / 100 : null, anterior: prev != null ? Math.round(prev * 100) / 100 : null, cambio_pct: rec != null && prev ? Math.round((rec - prev) / prev * 1000) / 10 : null }];
+  }
+});
+
+dash.calc('ritmos_base', {
+  inputs: ['records_anio'],
+  title: 'Marca de referencia para los ritmos',
+  description: 'Del año más reciente con marcas de 5 km, 10 km o media maratón, la que equivale al mejor 10 km según Riegel (T2 = T1 × (D2/D1)^1,06).',
+  fn: (recs) => {
+    const ok = recs.filter((r) => r.metros >= 5000 && r.segundos);
+    if (!ok.length) return [{ anio: null, base: null, t10: null }];
+    const year = Math.max(...ok.map((r) => r.anio));
+    let best = null;
+    for (const r of ok.filter((q) => q.anio === year)) { const t10 = r.segundos * Math.pow(10000 / r.metros, 1.06); if (!best || t10 < best.t10) best = { r, t10 }; }
+    const p = (n) => String(n).padStart(2, '0');
+    const fmt = (s) => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60; return h ? `${h}:${p(m)}:${p(x)}` : `${m}:${p(x)}`; };
+    return [{ anio: year, base: `${best.r.prueba} en ${fmt(best.r.segundos)} (${best.r.fecha})`, t10: Math.round(best.t10) }];
+  }
+});
+
+dash.calc('ritmos', {
+  inputs: ['ritmos_base'],
+  title: 'Ritmos de entrenamiento',
+  description: 'Rangos de ritmo como múltiplos de tu ritmo equivalente de 10 km: recuperación ≥ 1,32; suave 1,20–1,32; fondo 1,15–1,28; umbral 1,03–1,07; 10 km 1,00; series 0,94–0,97.',
+  fn: (base) => {
+    const b = base[0];
+    if (!b || !b.t10) return [];
+    const pk = b.t10 / 10;
+    const p = (n) => String(n).padStart(2, '0');
+    const f = (s) => `${Math.floor(s / 60)}:${p(Math.round(s % 60))}`;
+    const z = [
+      ['Recuperación', 1.32, null, 'Días después de una sesión dura; trote muy cómodo'],
+      ['Rodaje suave', 1.20, 1.32, 'La mayor parte de tus km; puedes conversar'],
+      ['Fondo largo', 1.15, 1.28, 'Salida larga del fin de semana'],
+      ['Umbral (tempo)', 1.03, 1.07, 'Bloques de 15–30 min «cómodamente duros»'],
+      ['Ritmo de 10 km', 1.0, 1.0, 'Series largas o tests'],
+      ['Series (VO2máx)', 0.94, 0.97, 'Repeticiones de 400 m a 1 km con pausa']
+    ];
+    return z.map(([tipo, a, c, uso]) => {
+      const fast = pk * a, slow = c ? pk * c : null;
+      const rango = slow == null ? `más lento que ${f(fast)} /km` : a === c ? `${f(fast)} /km` : `${f(fast)}–${f(slow)} /km`;
+      return { tipo, rapido_s: Math.round(fast), lento_s: slow != null ? Math.round(slow) : null, rango, uso };
+    });
+  }
+});
+
+dash.calc('rodajes_check', {
+  inputs: ['ritmos', 'activities'],
+  title: 'Carreras más rápidas que el ritmo suave',
+  description: 'De las carreras de 4 km o más de los últimos 28 días, cuántas fueron más rápidas que el límite rápido de tu ritmo suave.',
+  fn: (ritmos, activities) => {
+    const suave = ritmos.find((r) => r.tipo === 'Rodaje suave');
+    if (!suave) return [{ rapidos: null, total: null }];
+    const now = new Date();
+    const from = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - 27 * 86400000).toISOString().slice(0, 10);
+    const runs = activities.filter((r) => r.categoria === 'Carrera' && r.day >= from && Number(r.distance_km) >= 4 && r.pace_s_km);
+    return [{ rapidos: runs.filter((r) => r.pace_s_km < suave.rapido_s).length, total: runs.length }];
+  }
+});
+
+dash.calc('records_pivot', {
+  inputs: ['records_anio', 'records'],
+  title: 'Récords por año',
+  description: 'Mejor tiempo de cada distancia en este año y los tres anteriores, junto al mejor de siempre.',
+  fn: (recs, siempre) => {
+    const years = (dash.params().anios || []).map(Number).sort((a, b) => b - a);
+    const p = (n) => String(n).padStart(2, '0');
+    const fmt = (s) => { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60; return h ? `${h}:${p(m)}:${p(x)}` : `${m}:${p(x)}`; };
+    return ['1 km', '5 km', '10 km', 'Media maratón'].map((prueba) => {
+      const row = { prueba };
+      years.slice(0, 4).forEach((y, i) => { const r = recs.find((q) => q.prueba === prueba && Number(q.anio) === y); row['y' + i] = r ? fmt(r.segundos) : null; });
+      const s = siempre.find((q) => q.prueba === prueba);
+      row.siempre = s ? `${s.tiempo} (${String(s.fecha).slice(0, 4)})` : null;
+      return row;
+    });
+  }
+});
+
+dash.calc('potencia', {
+  inputs: ['potencia_anio'],
+  title: 'Potencia por año',
+  description: 'Mejor potencia media (W) de 1, 5 y 20 minutos en este año y los tres anteriores, la más alta entre bici real y virtual.',
+  fn: (pot) => {
+    const years = (dash.params().anios || []).map(Number).sort((a, b) => b - a);
+    return ['1 min', '5 min', '20 min'].map((esfuerzo) => {
+      const row = { esfuerzo };
+      years.slice(0, 4).forEach((y, i) => { const v = pot.filter((q) => q.esfuerzo === esfuerzo && Number(q.anio) === y).map((q) => Number(q.vatios)); row['y' + i] = v.length ? Math.max(...v) : null; });
+      return row;
+    });
+  }
+});
+
+dash.calc('ftp', {
+  inputs: ['potencia_anio', 'zonas'],
+  title: 'FTP',
+  description: 'FTP estimado = 95 % de tu mejor potencia de 20 minutos del año más reciente que la tenga, junto al FTP guardado en Strava.',
+  fn: (pot, zonas) => {
+    const p20 = pot.filter((q) => q.esfuerzo === '20 min');
+    const year = p20.length ? Math.max(...p20.map((q) => Number(q.anio))) : null;
+    const best = year ? Math.max(...p20.filter((q) => Number(q.anio) === year).map((q) => Number(q.vatios))) : null;
+    const z = zonas[0] || {};
+    return [{ ftp_20min: best ? Math.round(best * 0.95) : null, anio: year, ftp_strava: z.ftp != null ? z.ftp : null, ftp_strava_estimado: !!z.ftp_estimado }];
+  }
+});
+
+dash.calc('comparacion', {
+  inputs: ['activities', 'sesion', 'comp_resumen'],
+  title: 'Comparación de entrenamientos',
+  description: 'Distancia, tiempo, ritmo o velocidad, FC, potencia, desnivel y esfuerzo del entrenamiento elegido frente al de comparación, con la diferencia.',
+  fn: (activities, sesion, comp) => {
+    const pa = dash.params();
+    const A = activities.find((r) => r.id === String(pa.actividad)), B = activities.find((r) => r.id === String(pa.comparar));
+    if (!A || !B) return [];
+    const sa = sesion.find((s) => s.activity_id === A.id) || {}, sb = comp.find((s) => s.activity_id === B.id) || {};
+    const p = (n) => String(n).padStart(2, '0');
+    const hms = (s) => { s = Math.round(Math.abs(s)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60; return h ? `${h}:${p(m)}:${p(x)}` : `${m}:${p(x)}`; };
+    const num = (x, d = 1) => Number(x).toLocaleString('es', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const sign = (v) => (v > 0 ? '+' : v < 0 ? '−' : '±');
+    const rows = [{ metrica: 'Fecha', a: A.day, b: B.day, dif: '' }];
+    const dist = (r) => Number(r.distance_km) || 0;
+    if (dist(A) > 0.1 && dist(B) > 0.1) rows.push({ metrica: 'Distancia', a: `${num(dist(A), 2)} km`, b: `${num(dist(B), 2)} km`, dif: `${sign(dist(A) - dist(B))}${num(Math.abs(dist(A) - dist(B)), 2)} km` });
+    rows.push({ metrica: 'Tiempo', a: A.duracion, b: B.duracion, dif: `${sign(A.moving_s - B.moving_s)}${hms(A.moving_s - B.moving_s)}` });
+    if (A.pace_s_km && B.pace_s_km) rows.push({ metrica: 'Ritmo medio', a: A.pace, b: B.pace, dif: `${sign(A.pace_s_km - B.pace_s_km)}${hms(A.pace_s_km - B.pace_s_km)} /km` });
+    else if (dist(A) > 0.1 && dist(B) > 0.1) { const va = dist(A) / (A.moving_s / 3600), vb = dist(B) / (B.moving_s / 3600); rows.push({ metrica: 'Velocidad media', a: `${num(va)} km/h`, b: `${num(vb)} km/h`, dif: `${sign(va - vb)}${num(Math.abs(va - vb))} km/h` }); }
+    const pair = (metrica, x, y, unit) => { if (x != null && y != null) rows.push({ metrica, a: `${x} ${unit}`, b: `${y} ${unit}`, dif: `${sign(x - y)}${Math.abs(x - y)} ${unit}` }); };
+    pair('FC media', sa.fc_media, sb.fc_media, 'lpm');
+    pair('FC máxima', sa.fc_max, sb.fc_max, 'lpm');
+    pair('Potencia media', sa.vatios_media, sb.vatios_media, 'W');
+    pair('Desnivel', Math.round(A.elevation_m), Math.round(B.elevation_m), 'm');
+    if (A.relative_effort != null && B.relative_effort != null) rows.push({ metrica: 'Esfuerzo relativo', a: String(A.relative_effort), b: String(B.relative_effort), dif: `${sign(A.relative_effort - B.relative_effort)}${Math.abs(A.relative_effort - B.relative_effort)}` });
+    return rows;
+  }
+});
+
+// ---------- Comparación: elegir sesión ----------
+window.meCompPicked = false;
+dash.onData(() => {
+  if (window.meCompPicked) return;
+  const a = dash.data('activities');
+  if (a.status !== 'ok') return;
+  const pa = dash.params();
+  const i = a.data.findIndex((r) => r.id === String(pa.actividad));
+  if (i < 0) return;
+  const prev = a.data.slice(i + 1).find((r) => r.categoria === a.data[i].categoria);
+  if (prev && String(pa.comparar) !== prev.id) dash.setParams({ comparar: prev.id });
+});
+
+dash.draw('c-select', (sel) => {
+  const a = dash.data('activities');
+  const list = a.status === 'ok' ? a.data.slice(0, 120) : [];
+  sel.replaceChildren(...list.map((r) => new Option(`${ME.fmtShort.format(ME.keyToUTC(r.day))} ${r.day.slice(0, 4)} · ${r.name}${ME.hasDist(r) ? ' · ' + ME.fmtNum(r.distance_km) + ' km' : ''}`, r.id)));
+  sel.value = String(dash.params().comparar || '');
+  sel.onchange = () => { window.meCompPicked = true; dash.setParams({ comparar: sel.value }); };
+});
+
+dash.draw('c-table', (el) => {
+  const d = dash.data('comparacion');
+  if (d.status !== 'ok') return el.replaceChildren();
+  el.replaceChildren(...d.data.map((r) => { const tr = document.createElement('tr'); tr.append(ME.el('td', '', r.metrica), ME.el('td', 'me-num', r.a), ME.el('td', 'me-num', r.b), ME.el('td', 'me-num', r.dif)); return tr; }));
+});
+
+const meCompAct = () => { const a = dash.data('activities'); const id = String(dash.params().actividad || ''); return a.status === 'ok' ? a.data.find((r) => r.id === id) : null; };
+dash.draw('c-speed-title', (el) => { const r = meCompAct(); el.textContent = r && r.categoria === 'Carrera' ? 'Ritmo (min/km)' : 'Velocidad (km/h)'; });
+
+const meCompChart = (kind) => (el) => {
+  const A = dash.data('sesion_curva'), B = dash.data('comp_curva');
+  if (A.status === 'error' || B.status === 'error') return el.replaceChildren(ME.el('p', 'me-err', 'No se pudieron cargar las series.'));
+  if (A.status !== 'ok' || B.status !== 'ok') return el.replaceChildren(ME.el('p', 'me-muted', '—'));
+  const act = meCompAct();
+  const isRun = act && act.categoria === 'Carrera';
+  const useDist = A.data.some((c) => c.dist_km > 0.2) && B.data.some((c) => c.dist_km > 0.2);
+  const xv = (c) => (useDist ? c.dist_km : c.min);
+  const val = (c) => kind === 'hr' ? (c.fc > 40 ? c.fc : null) : (isRun ? (c.vel_kmh > 3 ? 3600 / c.vel_kmh : null) : (c.vel_kmh || null));
+  const prep = (rows) => { const pts = rows.map((c) => ({ x: xv(c), v: val(c) })).filter((c) => c.v != null && c.x != null); return pts.map((c, i) => { const w = pts.slice(Math.max(0, i - 2), i + 3); return { x: c.x, v: w.reduce((s, q) => s + q.v, 0) / w.length }; }); };
+  const a = prep(A.data), b = prep(B.data);
+  if (!a.length && !b.length) return el.replaceChildren(ME.el('p', 'me-muted', 'Sin datos para comparar.'));
+  const W = el.clientWidth, H = 200;
+  el.replaceChildren();
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', kind === 'hr' ? 'Frecuencia cardíaca de las dos sesiones' : 'Ritmo o velocidad de las dos sesiones');
+  const all = a.concat(b);
+  const ext = d3.extent(all, (c) => c.v);
+  const y = kind !== 'hr' && isRun ? d3.scaleLinear().domain([ext[1] + 10, ext[0] - 10]).range([H - 24, 8]) : d3.scaleLinear().domain([ext[0] - 5, ext[1] + 5]).nice().range([H - 24, 8]);
+  const fmt = kind !== 'hr' && isRun ? ME.fmtPace : (v) => String(Math.round(v));
+  const ml = ME.textWidth(svg, y.ticks(4).map(fmt)) + 10;
+  const x = d3.scaleLinear().domain([0, d3.max(all, (c) => c.x) || 1]).range([ml, W - 6]);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(fmt).tickSize(-(W - ml - 6))).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('transform', `translate(0,${H - 24})`).call(d3.axisBottom(x).ticks(W < 420 ? 4 : 6).tickFormat((v) => useDist ? `${v} km` : `${v} min`).tickSizeOuter(0));
+  const line = d3.line().x((c) => x(c.x)).y((c) => y(c.v));
+  svg.append('path').datum(b).attr('d', line).style('fill', 'none').style('stroke', dash.colors[1 % dash.colors.length]).style('stroke-width', 1.75);
+  svg.append('path').datum(a).attr('d', line).style('fill', 'none').style('stroke', dash.colors[0]).style('stroke-width', 2);
+  const tp = ME.tip(el);
+  const bisA = d3.bisector((c) => c.x).center;
+  svg.append('rect').attr('x', ml).attr('y', 0).attr('width', Math.max(0, W - ml - 6)).attr('height', H - 24).style('fill', 'transparent')
+    .on('pointermove', (ev) => {
+      const [px, py] = d3.pointer(ev, el), xx = x.invert(px);
+      const ca = a.length ? a[bisA(a, xx)] : null, cb = b.length ? b[bisA(b, xx)] : null;
+      const f = (c) => (c ? (kind === 'hr' ? `${Math.round(c.v)} lpm` : isRun ? `${ME.fmtPace(c.v)} /km` : `${ME.fmtNum(c.v)} km/h`) : '—');
+      tp.show([useDist ? `Km ${ME.fmtNum(xx, 1)}` : `Minuto ${ME.fmtNum(xx, 0)}`, `Esta sesión: ${f(ca)}`, `Comparada: ${f(cb)}`], px, py);
+    })
+    .on('pointerleave', () => tp.hide());
+};
+dash.draw('chart-c-hr', meCompChart('hr'));
+dash.draw('chart-c-speed', meCompChart('speed'));
+
+// ---------- Resumen semanal ----------
+const meR = (id) => { const d = dash.data(id); return d.status === 'ok' && Array.isArray(d.data) && d.data[0] ? d.data[0] : null; };
+const meT = (el, v) => { el.textContent = v == null ? '—' : String(v); };
+dash.draw('w-km', (el) => { const r = meR('semana_resumen'); meT(el, r && ME.fmtNum(r.km)); });
+dash.draw('w-km-ant', (el) => { const r = meR('semana_resumen'); meT(el, r && ME.fmtNum(r.km_ant)); });
+dash.draw('w-h', (el) => { const r = meR('semana_resumen'); meT(el, r && ME.fmtNum(r.horas)); });
+dash.draw('w-h-ant', (el) => { const r = meR('semana_resumen'); meT(el, r && ME.fmtNum(r.horas_ant)); });
+dash.draw('w-s', (el) => { const r = meR('semana_resumen'); meT(el, r && r.sesiones); });
+dash.draw('w-s-ant', (el) => { const r = meR('semana_resumen'); meT(el, r && r.sesiones_ant); });
+dash.draw('w-dura', (el) => { const r = meR('semana_resumen'); meT(el, r && r.dura_nombre ? r.dura_nombre : (r ? 'Sin sesiones aún' : null)); });
+dash.draw('w-dura-e', (el) => { const r = meR('semana_resumen'); meT(el, r && r.dura_esfuerzo); });
+
+// ---------- Mapa del año ----------
+dash.onData(() => {
+  document.querySelectorAll('.me-hcell').forEach((c) => {
+    const l = Number(c.dataset.lvl);
+    if (l > 0) { c.style.background = dash.colors[0]; c.style.opacity = String([0, 0.3, 0.55, 0.8, 1][l]); c.style.borderColor = 'transparent'; }
+  });
+});
+dash.draw('heatmap', (el) => {
+  const d = dash.data('dias_anio');
+  if (!ME.status(el, d, 'tu año de entrenamiento')) return;
+  const by = new Map(d.data.map((r) => [r.day, r]));
+  const DAY = 86400000;
+  const today = ME.keyToUTC(ME.todayKey).getTime();
+  const mon = today - ((new Date(today).getUTCDay() + 6) % 7) * DAY;
+  const start = mon - 51 * 7 * DAY;
+  const W = Math.max((el.parentElement || el).clientWidth, 560);
+  const left = 26, top = 16, gap = 2;
+  const cell = Math.max(8, Math.floor((W - left) / 52) - gap);
+  const H = top + 7 * (cell + gap);
+  el.replaceChildren();
+  const svg = d3.select(el).append('svg').attr('width', left + 52 * (cell + gap)).attr('height', H).attr('role', 'img').attr('aria-label', 'Minutos de entrenamiento por día en las últimas 52 semanas');
+  ['L', '', 'X', '', 'V', '', 'D'].forEach((t, i) => { if (t) svg.append('text').attr('x', 0).attr('y', top + i * (cell + gap) + cell - 1).text(t); });
+  const lvl = (m) => (!m ? 0 : m < 30 ? 1 : m < 60 ? 2 : m < 90 ? 3 : 4);
+  const op = [0, 0.3, 0.55, 0.8, 1];
+  const fmtM = new Intl.DateTimeFormat('es', { month: 'short', timeZone: 'UTC' });
+  const tp = ME.tip(el);
+  const cells = [];
+  let lastMonth = -1, lastLabelW = -10;
+  for (let w = 0; w < 52; w++) {
+    const wk = start + w * 7 * DAY;
+    const mth = new Date(wk).getUTCMonth();
+    if (mth !== lastMonth) { if (w < 50 && w - lastLabelW >= 3) { svg.append('text').attr('x', left + w * (cell + gap)).attr('y', 10).text(fmtM.format(new Date(wk))); lastLabelW = w; } lastMonth = mth; }
+    for (let i = 0; i < 7; i++) {
+      const t = wk + i * DAY;
+      if (t > today) continue;
+      const key = new Date(t).toISOString().slice(0, 10);
+      cells.push({ key, x: left + w * (cell + gap), y: top + i * (cell + gap), r: by.get(key) });
+    }
+  }
+  svg.append('g').selectAll('rect').data(cells).join('rect')
+    .attr('x', (c) => c.x).attr('y', (c) => c.y).attr('width', cell).attr('height', cell).attr('rx', 2)
+    .style('fill', (c) => (c.r ? dash.colors[0] : 'var(--color-bg)'))
+    .style('fill-opacity', (c) => (c.r ? op[lvl(c.r.minutos)] : 1))
+    .style('stroke', (c) => (c.r ? 'none' : 'var(--color-border-line)'))
+    .on('pointerenter', (ev, c) => { const [px, py] = d3.pointer(ev, el); tp.show([ME.fmtLong.format(ME.keyToUTC(c.key)), c.r ? `${c.r.minutos} min · ${c.r.sesiones} ${c.r.sesiones === 1 ? 'sesión' : 'sesiones'} · esfuerzo ${c.r.esfuerzo}` : 'Descanso'], px, py); })
+    .on('pointerleave', () => tp.hide());
+});
+
+// ---------- Eficiencia ----------
+dash.draw('e-now', (el) => { const r = meR('eficiencia_resumen'); meT(el, r && r.reciente != null ? ME.fmtNum(r.reciente, 2) : null); });
+dash.draw('e-prev', (el) => { const r = meR('eficiencia_resumen'); meT(el, r && r.anterior != null ? ME.fmtNum(r.anterior, 2) : null); });
+dash.draw('e-pct', (el) => {
+  const r = meR('eficiencia_resumen');
+  document.querySelectorAll('.me-eff-cmp').forEach((c) => { c.hidden = !r || r.cambio_pct == null; });
+  meT(el, r && r.cambio_pct != null ? ME.fmtNum(Math.abs(r.cambio_pct), 1) : null);
+});
+dash.draw('e-dir', (el) => { const r = meR('eficiencia_resumen'); meT(el, r && r.cambio_pct != null ? (r.cambio_pct >= 0 ? 'más' : 'menos') : null); });
+
+dash.draw('chart-eff', (el) => {
+  const d = dash.data('eficiencia'), wk = dash.data('eficiencia_semana');
+  if (!ME.status(el, d, 'la eficiencia')) return;
+  if (!d.data.length) return el.replaceChildren(ME.el('p', 'me-muted', 'No hay carreras con FC suficientes.'));
+  const W = el.clientWidth, H = 230;
+  el.replaceChildren();
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Metros por latido de cada carrera y media semanal');
+  const ext = d3.extent(d.data, (r) => r.metros_latido);
+  const y = d3.scaleLinear().domain([ext[0] - 0.03, ext[1] + 0.03]).nice().range([H - 26, 10]);
+  const ml = ME.textWidth(svg, y.ticks(4).map((v) => ME.fmtNum(v, 2))) + 10;
+  const x = d3.scaleUtc().domain(d3.extent(d.data, (r) => ME.keyToUTC(r.day))).range([ml + 6, W - 10]);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(4).tickFormat((v) => ME.fmtNum(v, 2)).tickSize(-(W - ml - 4))).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('transform', `translate(0,${H - 26})`).call(d3.axisBottom(x).ticks(W < 420 ? 3 : 6).tickFormat((t) => new Intl.DateTimeFormat('es', { month: 'short', timeZone: 'UTC' }).format(t)).tickSizeOuter(0));
+  const tp = ME.tip(el);
+  svg.append('g').selectAll('circle').data(d.data).join('circle')
+    .attr('cx', (r) => x(ME.keyToUTC(r.day))).attr('cy', (r) => y(r.metros_latido)).attr('r', 3.5)
+    .style('fill', dash.colors[0]).style('fill-opacity', 0.4)
+    .on('pointerenter', (ev, r) => { const [px, py] = d3.pointer(ev, el); tp.show([`${ME.fmtShort.format(ME.keyToUTC(r.day))} · ${r.name}`, `${ME.fmtNum(r.metros_latido, 2)} m por latido`, `${r.pace} · FC ${r.fc_media} lpm`], px, py); })
+    .on('pointerleave', () => tp.hide());
+  if (wk.status === 'ok' && wk.data.length > 1) {
+    const pts = wk.data.map((r) => ({ t: ME.keyToUTC(r.semana).getTime() + 3 * 86400000, v: r.metros_latido }));
+    svg.append('path').datum(pts).attr('d', d3.line().x((p) => x(new Date(p.t))).y((p) => y(p.v))).style('fill', 'none').style('stroke', dash.colors[0]).style('stroke-width', 2);
+  }
+});
+
+// ---------- Ritmos ----------
+dash.draw('r-anio', (el) => { const r = meR('ritmos_base'); meT(el, r && r.anio); });
+dash.draw('r-base', (el) => { const r = meR('ritmos_base'); meT(el, r && r.base); });
+dash.draw('r-rapidos', (el) => { const r = meR('rodajes_check'); meT(el, r && r.rapidos); });
+dash.draw('r-total', (el) => { const r = meR('rodajes_check'); meT(el, r && r.total); });
+dash.draw('ritmos', (el) => {
+  const d = dash.data('ritmos');
+  if (d.status !== 'ok') return el.replaceChildren();
+  el.replaceChildren(...d.data.map((r) => { const tr = document.createElement('tr'); tr.append(ME.el('td', '', r.tipo), ME.el('td', 'me-num', r.rango), ME.el('td', 'me-wrap', r.uso)); return tr; }));
+});
+
+// ---------- Años en cabeceras ----------
+const meYear = (i) => (el) => { const ys = (dash.params().anios || []).map(Number).sort((a, b) => b - a); meT(el, ys[i] != null ? ys[i] : null); };
+[0, 1, 2, 3].forEach((i) => { dash.draw('p-y' + i, meYear(i)); dash.draw('rp-y' + i, meYear(i)); });
+
+// ---------- Potencia y récords por año ----------
+dash.draw('potencia', (el) => {
+  const d = dash.data('potencia');
+  if (d.status !== 'ok') return el.replaceChildren();
+  el.replaceChildren(...d.data.map((r) => { const tr = document.createElement('tr'); tr.append(ME.el('td', '', r.esfuerzo), ...[0, 1, 2, 3].map((i) => ME.el('td', 'me-num', r['y' + i] != null ? String(r['y' + i]) : '—'))); return tr; }));
+});
+dash.draw('records-pivot', (el) => {
+  const d = dash.data('records_pivot');
+  if (d.status !== 'ok') return el.replaceChildren();
+  el.replaceChildren(...d.data.map((r) => { const tr = document.createElement('tr'); tr.append(ME.el('td', '', r.prueba), ...[0, 1, 2, 3].map((i) => ME.el('td', 'me-num', r['y' + i] || '—')), ME.el('td', 'me-num', r.siempre || '—')); return tr; }));
+});
+dash.draw('f-20', (el) => { const r = meR('ftp'); meT(el, r && r.ftp_20min); });
+dash.draw('f-anio', (el) => { const r = meR('ftp'); meT(el, r && r.anio); });
+dash.draw('f-strava', (el) => { const r = meR('ftp'); meT(el, r && r.ftp_strava); });
+dash.draw('f-strava-src', (el) => { const r = meR('ftp'); meT(el, r ? (r.ftp_strava_estimado ? 'Estimado por Strava' : 'Configurado por ti') : null); });
+</script>
+
+<script>
+// ================= RESUMEN: carrera y progreso =================
+dash.calc('carrera_prep', {
+  inputs: ['activities', 'carreras_cd'],
+  title: 'Volumen hacia la próxima carrera',
+  description: 'Km corriendo por semana (lunes a domingo) en las 12 semanas previas y las semanas que faltan hasta tu próxima carrera; las 2 semanas antes de la carrera se marcan como descarga.',
+  fn: (activities, carreras) => {
+    const next = carreras.filter((c) => c.dias >= 0).sort((a, b) => a.dias - b.dias)[0];
+    if (!next) return [];
+    const DAY = 86400000, now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const mon = (t) => t - ((new Date(t).getUTCDay() + 6) % 7) * DAY;
+    const thisMon = mon(today);
+    const [y, m, d] = next.fecha.split('-').map(Number);
+    const raceMon = mon(Date.UTC(y, m - 1, d));
+    const start = thisMon - 11 * 7 * DAY;
+    const end = Math.min(raceMon, thisMon + 52 * 7 * DAY);
+    const km = {};
+    for (const r of activities) {
+      if (r.categoria !== 'Carrera' || !r.day) continue;
+      const [yy, mm, dd] = r.day.split('-').map(Number);
+      const w = mon(Date.UTC(yy, mm - 1, dd));
+      if (w >= start) km[w] = (km[w] || 0) + (Number(r.distance_km) || 0);
+    }
+    const out = [];
+    for (let w = start; w <= end; w += 7 * DAY) {
+      out.push({ semana: new Date(w).toISOString().slice(0, 10), km: w <= thisMon ? Math.round((km[w] || 0) * 10) / 10 : null, futura: w > thisMon, descarga: w >= raceMon - 14 * DAY && w < raceMon, carrera: w === raceMon, nombre: next.nombre, fecha: next.fecha, dias: next.dias });
+    }
+    return out;
+  }
+});
+
+const mePR = (id) => { const d = dash.data(id); return d.status === 'ok' && Array.isArray(d.data) && d.data[0] ? d.data[0] : null; };
+const mePT = (el, v) => { el.textContent = v == null ? '—' : String(v); };
+
+dash.draw('k-eff', (el) => { const r = mePR('eficiencia_resumen'); mePT(el, r && r.reciente != null ? ME.fmtNum(r.reciente, 2) : null); });
+dash.draw('k-eff-delta', (el) => {
+  const r = mePR('eficiencia_resumen');
+  el.className = 'me-kpi-sub';
+  if (!r || r.cambio_pct == null) return mePT(el, 'Sin datos para comparar');
+  el.classList.add(r.cambio_pct >= 0 ? 'me-good' : 'me-bad');
+  mePT(el, `${r.cambio_pct >= 0 ? '▲ +' : '▼ '}${ME.fmtNum(r.cambio_pct, 1)} % vs. 8 semanas previas`);
+});
+const meNextRace = () => { const d = dash.data('carreras_cd'); return d.status === 'ok' ? d.data.find((c) => c.dias >= 0) : null; };
+dash.draw('k-race-days', (el) => { const c = meNextRace(); mePT(el, c ? c.dias : null); });
+dash.draw('k-race-name', (el) => {
+  const d = dash.data('carreras_cd'), c = meNextRace();
+  mePT(el, c ? `${c.nombre} · ${ME.fmtDate.format(ME.keyToUTC(c.fecha))}` : d.status === 'ok' ? 'Agrega una más abajo' : null);
+});
+dash.draw('prep-sub', (el) => {
+  const c = meNextRace();
+  mePT(el, c ? `${c.nombre}, ${ME.fmtDate.format(ME.keyToUTC(c.fecha))} · ${ME.fmtNum(c.distancia_km, c.distancia_km % 1 ? 2 : 0)} km${c.prediccion ? ' · tiempo estimado ' + c.prediccion : ''}` : 'Sin carrera anotada');
+});
+
+dash.draw('chart-prep', (el) => {
+  const d = dash.data('carrera_prep');
+  const has = d.status === 'ok' && d.data.length > 0;
+  document.querySelectorAll('#prep-empty').forEach((e) => { e.hidden = d.status !== 'ok' || has; });
+  document.querySelectorAll('#prep-legend').forEach((e) => { e.hidden = !has; });
+  if (d.status === 'error') return ME.status(el, d, 'el volumen hacia la carrera');
+  if (!has) return el.replaceChildren();
+  const rows = d.data;
+  const W = el.clientWidth, H = 230;
+  el.replaceChildren();
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('height', H).attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Km corriendo por semana hasta la próxima carrera');
+  const done = rows.filter((r) => !r.futura);
+  const maxKm = d3.max(done, (r) => r.km) || 10;
+  const y = d3.scaleLinear().domain([0, maxKm * 1.2]).nice().range([H - 26, 12]);
+  const ml = ME.textWidth(svg, y.ticks(4).map(String)) + 10;
+  const x = d3.scaleBand().domain(rows.map((r) => r.semana)).range([ml, W - 4]).padding(0.2);
+  svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(W - ml - 4))).call((g) => g.select('.domain').remove());
+  const n = rows.length, every = Math.max(1, Math.ceil(n / (W < 420 ? 5 : 9)));
+  svg.append('g').attr('transform', `translate(0,${H - 26})`).call(d3.axisBottom(x).tickValues(rows.map((r) => r.semana).filter((_, i) => (n - 1 - i) % every === 0)).tickFormat((s) => ME.fmtShort.format(ME.keyToUTC(s))).tickSizeOuter(0));
+  const avg4 = d3.mean(done.slice(-4), (r) => r.km) || 0;
+  const tp = ME.tip(el);
+  svg.append('g').selectAll('rect').data(rows).join('rect')
+    .attr('x', (r) => x(r.semana)).attr('width', x.bandwidth())
+    .attr('y', (r) => (r.futura ? y(avg4 * (r.descarga ? 0.6 : 1)) : y(r.km)))
+    .attr('height', (r) => (r.futura ? y(0) - y(avg4 * (r.descarga ? 0.6 : 1)) : y(0) - y(r.km))).attr('rx', 2)
+    .style('fill', (r) => (r.futura ? 'transparent' : dash.colors[0]))
+    .style('stroke', (r) => (r.futura ? (r.descarga ? 'var(--color-warn)' : 'var(--cds-chart-muted)') : 'none'))
+    .style('stroke-dasharray', (r) => (r.futura ? '3 2' : null))
+    .on('pointerenter pointermove', (ev, r) => {
+      const [px, py] = d3.pointer(ev, el);
+      const lines = [`Semana del ${ME.fmtShort.format(ME.keyToUTC(r.semana))}`];
+      if (!r.futura) lines.push(`${ME.fmtNum(r.km)} km corriendo`);
+      else lines.push(r.carrera ? 'Semana de la carrera' : r.descarga ? `Descarga: unos ${ME.fmtNum(avg4 * 0.6)} km (60 % de tu media)` : `Referencia: tu media de 4 semanas, ${ME.fmtNum(avg4)} km`);
+      tp.show(lines, px, py);
+    })
+    .on('pointerleave', () => tp.hide());
+  const last = rows[rows.length - 1];
+  svg.append('text').attr('class', 'me-val').attr('x', x(last.semana) + x.bandwidth()).attr('y', 10).attr('text-anchor', 'end').text('Carrera: ' + ME.fmtShort.format(ME.keyToUTC(last.fecha)));
+});
+</script>

@@ -1,0 +1,10 @@
+{
+  "description": "Semanas seguidas con al menos una actividad, según Strava.",
+  "source": {
+    "args": {},
+    "connector": "Strava",
+    "kind": "call",
+    "tool": "get_active_streak"
+  },
+  "title": "Racha semanal"
+}

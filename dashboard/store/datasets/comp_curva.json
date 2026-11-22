@@ -1,0 +1,25 @@
+{
+  "description": "FC, velocidad y distancia a lo largo del entrenamiento con el que comparas (hasta 300 puntos).",
+  "source": {
+    "args": {
+      "activity_id": "{{comparar}}",
+      "resolution": 300,
+      "streams": [
+        "time",
+        "distance",
+        "heart_rate",
+        "velocity_smooth"
+      ]
+    },
+    "connector": "Strava",
+    "kind": "call",
+    "rules": {
+      "comparar": {
+        "description": "Cualquier actividad de tu Strava, por su número",
+        "pattern": "^[0-9]{1,20}$"
+      }
+    },
+    "tool": "get_activity_streams"
+  },
+  "title": "Entrenamiento comparado: series"
+}

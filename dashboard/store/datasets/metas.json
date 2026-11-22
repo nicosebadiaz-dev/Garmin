@@ -1,0 +1,8 @@
+{
+  "description": "Los objetivos que creas (km, horas o sesiones por semana, mes o año). Cada persona ve solo los suyos.",
+  "source": {
+    "kind": "store",
+    "path": "data/users/me/metas/items"
+  },
+  "title": "Objetivos"
+}

@@ -1,0 +1,18 @@
+{
+  "description": "FC media y máxima, potencia, cadencia y calorías del entrenamiento elegido.",
+  "source": {
+    "args": {
+      "activity_id": "{{actividad}}"
+    },
+    "connector": "Strava",
+    "kind": "call",
+    "rules": {
+      "actividad": {
+        "description": "Cualquier actividad de tu Strava, por su número",
+        "pattern": "^[0-9]{1,20}$"
+      }
+    },
+    "tool": "get_activity_performance"
+  },
+  "title": "Entrenamiento elegido: resumen"
+}

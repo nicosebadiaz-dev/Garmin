@@ -1,0 +1,10 @@
+{
+  "description": "Tus 5 zonas de FC configuradas en Strava.",
+  "source": {
+    "args": {},
+    "connector": "Strava",
+    "kind": "call",
+    "tool": "get_athlete_zones"
+  },
+  "title": "Zonas de frecuencia cardíaca"
+}

@@ -1,0 +1,13 @@
+{
+  "description": "Tus 300 actividades más recientes en Strava, con distancia, tiempo, ritmo y esfuerzo.",
+  "source": {
+    "args": {
+      "first": 100,
+      "use_preferred_units": true
+    },
+    "connector": "Strava",
+    "kind": "call",
+    "tool": "list_activities"
+  },
+  "title": "Actividades de Strava"
+}

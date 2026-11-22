@@ -1,0 +1,8 @@
+{
+  "description": "Las carreras que anotas, con fecha, distancia y tiempo objetivo. Cada persona ve solo las suyas.",
+  "source": {
+    "kind": "store",
+    "path": "data/users/me/carreras/items"
+  },
+  "title": "Próximas carreras"
+}

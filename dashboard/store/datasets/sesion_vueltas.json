@@ -1,0 +1,18 @@
+{
+  "description": "Cada vuelta del entrenamiento elegido con tiempo, ritmo, FC, potencia y desnivel.",
+  "source": {
+    "args": {
+      "activity_id": "{{actividad}}"
+    },
+    "connector": "Strava",
+    "kind": "call",
+    "rules": {
+      "actividad": {
+        "description": "Cualquier actividad de tu Strava, por su número",
+        "pattern": "^[0-9]{1,20}$"
+      }
+    },
+    "tool": "get_activity_performance"
+  },
+  "title": "Entrenamiento elegido: vueltas"
+}

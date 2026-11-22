@@ -1,0 +1,14 @@
+{
+  "description": "Mejores marcas de siempre en carrera (milla, 5 km, 10 km, media maratón, maratón).",
+  "source": {
+    "args": {
+      "sports": [
+        "Run"
+      ]
+    },
+    "connector": "Strava",
+    "kind": "call",
+    "tool": "get_athlete_best_efforts"
+  },
+  "title": "Récords de carrera"
+}

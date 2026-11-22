@@ -1,0 +1,316 @@
+<div class="me">
+  <header class="me-head" id="cabecera">
+    <h1 class="me-title">Mi Entrenamiento</h1>
+    <p class="me-lede" data-read lang="es">En los últimos 28 días corriste <b data-draw="t-km" data-source="kpis" data-field="km28" data-row="0">—</b> km en <b data-draw="t-runs" data-source="kpis" data-field="salidas28" data-row="0">—</b> salidas<span class="me-cmp">, un <b data-draw="t-pct" data-source="kpis" data-field="cambio_pct" data-row="0">—</b>% <span data-draw="t-dir">—</span> que en los 28 días anteriores</span>. Llevas <b data-draw="t-streak" data-source="streak" data-field="semanas" data-row="0">—</b> semanas seguidas entrenando.</p>
+    <label class="me-sub me-filter">Deporte
+      <select class="dash-select" id="f-deporte" aria-label="Filtrar por deporte"><option value="">Todos los deportes</option><option>Carrera</option><option>Ciclismo</option><option>Natación</option><option>Fuerza</option><option>Movilidad</option><option>Otros</option></select>
+    </label>
+  </header>
+
+  <nav class="me-tabs" role="tablist" aria-label="Secciones">
+    <button type="button" class="me-tab" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+    <button type="button" class="me-tab" role="tab" data-tab="calendario" aria-selected="false">Semana y mes</button>
+    <button type="button" class="me-tab" role="tab" data-tab="progreso" aria-selected="false">Progreso</button>
+    <button type="button" class="me-tab" role="tab" data-tab="sesion" aria-selected="false">Último entrenamiento</button>
+    <button type="button" class="me-tab" role="tab" data-tab="detalle" aria-selected="false">Detalle</button>
+  </nav>
+
+  <!-- ==================== RESUMEN ==================== -->
+  <section class="me-panel" id="resumen" role="tabpanel">
+    <div class="me-kpis" id="kpis">
+      <div class="me-card me-kpi" id="kpi-km">
+        <span class="me-kpi-label">Km corriendo · 28 días</span>
+        <span class="me-kpi-value"><span data-draw="k-km" data-source="kpis" data-field="km28" data-row="0" data-fetchpriority="high">—</span><span class="me-kpi-unit">km</span></span>
+        <span class="me-kpi-sub"><span data-draw="k-km-delta">—</span> vs. 28 días previos (<span data-draw="k-km-prev" data-source="kpis" data-field="km_prev" data-row="0">—</span> km)</span>
+      </div>
+      <div class="me-card me-kpi" id="kpi-eficiencia">
+        <span class="me-kpi-label">Eficiencia aeróbica · 4 semanas</span>
+        <span class="me-kpi-value"><span data-draw="k-eff" data-source="eficiencia_resumen" data-field="reciente" data-row="0">—</span><span class="me-kpi-unit">m/latido</span></span>
+        <span class="me-kpi-sub" data-draw="k-eff-delta">—</span>
+      </div>
+      <div class="me-card me-kpi" id="kpi-carrera">
+        <span class="me-kpi-label">Próxima carrera</span>
+        <span class="me-kpi-value"><span data-draw="k-race-days" data-source="carreras_cd" data-field="dias" data-row="0">—</span><span class="me-kpi-unit">días</span></span>
+        <span class="me-kpi-sub" data-draw="k-race-name">—</span>
+      </div>
+      <div class="me-card me-kpi" id="kpi-racha">
+        <span class="me-kpi-label">Racha semanal</span>
+        <span class="me-kpi-value"><span data-draw="k-streak" data-source="streak" data-field="semanas" data-row="0">—</span><span class="me-kpi-unit">semanas</span></span>
+        <span class="me-kpi-sub">Desde el <span data-draw="k-streak-since" data-source="streak" data-field="desde" data-row="0">—</span></span>
+      </div>
+    </div>
+
+    <div class="me-card" id="preparacion">
+      <div><h2 class="me-h2">Camino a tu próxima carrera</h2><p class="me-sub" data-draw="prep-sub">—</p></div>
+      <p class="me-empty" id="prep-empty" hidden>Anota tu próxima carrera en «Agregar una carrera» y aquí verás tu volumen semanal hasta esa fecha.</p>
+      <div class="me-legend" id="prep-legend"><span><i class="me-dot" data-series="0"></i>Km corridos</span><span><i class="me-hcell"></i>Semanas que faltan</span><span><i class="me-hcell me-hcell-taper"></i>Descarga (2 últimas semanas)</span></div>
+      <div class="me-chart" data-draw="chart-prep" data-source="carrera_prep"></div>
+      <p class="me-note">Lo habitual es subir el volumen poco a poco (no más de un 10 % por semana) y reducirlo un 30–50 % en las dos semanas previas a la carrera.</p>
+    </div>
+
+    <div class="me-grid2">
+      <div class="me-card" id="objetivos">
+        <div><h2 class="me-h2">Objetivos</h2><p class="me-sub">La línea vertical marca dónde deberías ir según los días que pasaron del periodo</p></div>
+        <p class="me-empty" id="goals-empty" hidden>Todavía no tienes objetivos. Crea el primero con el formulario de abajo.</p>
+        <ul class="me-goals" data-draw="goals" data-source="metas_progreso"></ul>
+        <details class="me-add"><summary>Agregar un objetivo</summary>
+          <form class="me-form" id="form-meta" autocomplete="off">
+          <label>Tipo<select id="f-meta-tipo"><option value="km_carrera">Km corriendo</option><option value="horas">Horas entrenando</option><option value="sesiones">Sesiones</option></select></label>
+          <label>Deporte (sesiones)<select id="f-meta-cat"><option value="">Todos</option><option>Carrera</option><option>Ciclismo</option><option>Natación</option><option>Fuerza</option><option>Movilidad</option></select></label>
+          <label>Periodo<select id="f-meta-per"><option value="semana">Por semana</option><option value="mes" selected>Por mes</option><option value="anio">Por año</option></select></label>
+          <label>Objetivo<input type="number" id="f-meta-obj" min="1" max="10000" step="1" required inputmode="numeric"></label>
+          <button type="submit" class="me-primary">Crear objetivo</button>
+        </form>
+        <p class="me-msg is-ok" data-msg="meta-ok" hidden>Objetivo creado.</p>
+        <p class="me-msg is-bad" data-msg="meta-bad" hidden>No se pudo guardar. Revisa tu conexión y vuelve a intentarlo.</p>
+        </details>
+      </div>
+      <div class="me-card" id="carreras">
+        <div><h2 class="me-h2">Próximas carreras</h2><p class="me-sub">Cuenta regresiva y tiempo estimado a partir de tus récords</p></div>
+        <p class="me-empty" id="races-empty" hidden>No tienes carreras anotadas. Agrega tu próxima carrera abajo.</p>
+        <ul class="me-races" data-draw="races" data-source="carreras_cd"></ul>
+        <details class="me-add"><summary>Agregar una carrera</summary>
+          <form class="me-form" id="form-carrera" autocomplete="off">
+          <label class="me-wide">Nombre<input type="text" id="f-car-nombre" maxlength="80" required placeholder="Ej.: Media Maratón de Montevideo"></label>
+          <label>Fecha<input type="date" id="f-car-fecha" min="2020-01-01" max="2035-12-31" required></label>
+          <label>Distancia (km)<input type="number" id="f-car-dist" min="0.4" max="250" step="0.001" required inputmode="decimal" placeholder="21.097"></label>
+          <label>Tiempo objetivo (opcional)<input type="text" id="f-car-obj" maxlength="8" pattern="^(\d{1,2}:)?\d{1,2}:\d{2}$" placeholder="1:59:00"></label>
+          <button type="submit" class="me-primary">Agregar carrera</button>
+        </form>
+        <p class="me-msg is-ok" data-msg="carrera-ok" hidden>Carrera agregada.</p>
+        <p class="me-msg is-bad" data-msg="carrera-bad" hidden>No se pudo guardar. Revisa la fecha y la distancia, y vuelve a intentarlo.</p>
+        </details>
+        <p class="me-note">El tiempo estimado aplica la fórmula de Riegel a tu récord de la distancia más cercana. Si ese récord es antiguo, la estimación puede ser optimista.</p>
+      </div>
+    </div>
+
+    <div class="me-card" id="semana">
+      <div><h2 class="me-h2">Esta semana frente a la anterior</h2><p class="me-sub">De lunes a hoy, comparado con la semana pasada completa</p></div>
+      <div class="me-stats">
+        <div class="me-stat"><span class="me-stat-l">Km corriendo</span><span class="me-stat-v"><span data-draw="w-km" data-source="semana_resumen" data-field="km" data-row="0">—</span><span class="me-kpi-unit">km</span></span><span class="me-kpi-sub">Semana pasada: <span data-draw="w-km-ant" data-source="semana_resumen" data-field="km_ant" data-row="0">—</span> km</span></div>
+        <div class="me-stat"><span class="me-stat-l">Horas</span><span class="me-stat-v"><span data-draw="w-h" data-source="semana_resumen" data-field="horas" data-row="0">—</span><span class="me-kpi-unit">h</span></span><span class="me-kpi-sub">Semana pasada: <span data-draw="w-h-ant" data-source="semana_resumen" data-field="horas_ant" data-row="0">—</span> h</span></div>
+        <div class="me-stat"><span class="me-stat-l">Sesiones</span><span class="me-stat-v"><span data-draw="w-s" data-source="semana_resumen" data-field="sesiones" data-row="0">—</span></span><span class="me-kpi-sub">Semana pasada: <span data-draw="w-s-ant" data-source="semana_resumen" data-field="sesiones_ant" data-row="0">—</span></span></div>
+        <div class="me-stat"><span class="me-stat-l">Sesión más dura</span><span class="me-stat-v me-stat-small" data-draw="w-dura" data-source="semana_resumen" data-field="dura_nombre" data-row="0">—</span><span class="me-kpi-sub">Esfuerzo relativo <span data-draw="w-dura-e" data-source="semana_resumen" data-field="dura_esfuerzo" data-row="0">—</span></span></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="constancia">
+      <div><h2 class="me-h2">Días desde la última sesión</h2><p class="me-sub">Amarillo a partir de 14 días, rojo a partir de 30</p></div>
+      <div class="me-row" data-draw="constancia" data-source="constancia"></div>
+    </div>
+  </section>
+
+  <!-- ==================== SEMANA Y MES ==================== -->
+  <section class="me-panel" id="calendario" role="tabpanel" hidden>
+    <div class="me-card" id="cal-card">
+      <div class="me-calbar">
+        <h2 class="me-month" data-draw="month-label">—</h2>
+        <div class="me-nav">
+          <button type="button" class="me-btn" data-cal-nav="-1" aria-label="Mes anterior">← Anterior</button>
+          <button type="button" class="me-btn" data-cal-nav="0">Hoy</button>
+          <button type="button" class="me-btn" data-cal-nav="1" aria-label="Mes siguiente">Siguiente →</button>
+        </div>
+      </div>
+      <div class="me-legend" aria-label="Deportes">
+        <span><i class="me-dot" data-cat="Carrera"></i>Carrera</span>
+        <span><i class="me-dot" data-cat="Ciclismo"></i>Ciclismo</span>
+        <span><i class="me-dot" data-cat="Natación"></i>Natación</span>
+        <span><i class="me-dot" data-cat="Fuerza"></i>Fuerza</span>
+        <span><i class="me-dot" data-cat="Movilidad"></i>Movilidad</span>
+        <span><i class="me-dot" data-cat="Otros"></i>Otros</span>
+      </div>
+      <div class="me-calwrap">
+        <div class="me-calhead" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span><span class="me-wk-h">Semana</span></div>
+        <div class="me-cal" data-draw="calendar" data-source="act_f" aria-label="Calendario de entrenamientos"></div>
+      </div>
+    </div>
+
+    <div class="me-grid2">
+      <div class="me-card" id="km-semana">
+        <div><h2 class="me-h2">Kilómetros de carrera por semana</h2><p class="me-sub">Últimas 16 semanas, de lunes a domingo</p></div>
+        <div class="me-chart" data-draw="chart-runkm" data-source="weekly"></div>
+      </div>
+      <div class="me-card" id="horas-semana">
+        <div><h2 class="me-h2">Horas por semana y deporte</h2><p class="me-sub">Últimas 16 semanas, tiempo en movimiento</p></div>
+        <div class="me-chart" data-draw="chart-hours" data-source="weekly"></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="anio">
+      <div><h2 class="me-h2">Tu año de entrenamiento</h2><p class="me-sub">Últimas 52 semanas · cada cuadro es un día, más oscuro cuantos más minutos entrenaste</p></div>
+      <div class="me-heatwrap"><div class="me-heat" data-draw="heatmap" data-source="dias_anio"></div></div>
+      <div class="me-legend"><span>Menos</span><span><i class="me-hcell" data-lvl="0"></i><i class="me-hcell" data-lvl="1"></i><i class="me-hcell" data-lvl="2"></i><i class="me-hcell" data-lvl="3"></i><i class="me-hcell" data-lvl="4"></i></span><span>Más</span></div>
+    </div>
+
+    <div class="me-card" id="recientes">
+      <div><h2 class="me-h2">Últimas actividades</h2><p class="me-sub">Las 12 más recientes</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="act_f" data-row-key="id">
+          <thead><tr><th data-field="day">Fecha</th><th data-field="name">Actividad</th><th data-field="distance_km" class="me-num">Km</th><th data-field="duracion" class="me-num">Tiempo</th><th data-field="pace" class="me-num">Ritmo</th></tr></thead>
+          <tbody data-draw="recent"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PROGRESO ==================== -->
+  <section class="me-panel" id="progreso" role="tabpanel" hidden>
+    <div class="me-card" id="eficiencia">
+      <div><h2 class="me-h2">Eficiencia aeróbica al correr</h2><p class="me-sub">Metros que avanzas por cada latido en carreras de 4 km o más · la línea es la media semanal</p></div>
+      <p class="me-lede" data-read lang="es">En las últimas 4 semanas avanzaste <b data-draw="e-now" data-source="eficiencia_resumen" data-field="reciente" data-row="0">—</b> m por latido, <span class="me-eff-cmp">un <b data-draw="e-pct" data-source="eficiencia_resumen" data-field="cambio_pct" data-row="0">—</b>% <span data-draw="e-dir">—</span> que en las 8 semanas anteriores (<span data-draw="e-prev" data-source="eficiencia_resumen" data-field="anterior" data-row="0">—</span> m).</span></p>
+      <div class="me-chart" data-draw="chart-eff" data-source="eficiencia eficiencia_semana"></div>
+      <p class="me-note">Si este número sube, tu corazón trabaja menos para la misma velocidad: estás ganando forma aunque el ritmo no cambie. Lo afectan el calor, el desnivel y la fatiga, así que mira la tendencia y no cada punto.</p>
+    </div>
+
+    <div class="me-grid2">
+      <div class="me-card" id="ritmos">
+        <div><h2 class="me-h2">Tus ritmos de entrenamiento</h2><p class="me-sub">Estimados a partir de tu mejor marca de <span data-draw="r-anio" data-source="ritmos_base" data-field="anio" data-row="0">—</span>: <span data-draw="r-base" data-source="ritmos_base" data-field="base" data-row="0">—</span></p></div>
+        <div class="me-tablewrap">
+          <table class="me-table" data-source="ritmos" data-row-key="tipo">
+            <thead><tr><th data-field="tipo">Tipo de sesión</th><th data-field="rango" class="me-num">Ritmo</th><th data-field="uso">Para qué</th></tr></thead>
+            <tbody data-draw="ritmos"></tbody>
+          </table>
+        </div>
+        <p class="me-lede" data-read lang="es">En los últimos 28 días, <b data-draw="r-rapidos" data-source="rodajes_check" data-field="rapidos" data-row="0">—</b> de tus <b data-draw="r-total" data-source="rodajes_check" data-field="total" data-row="0">—</b> carreras de 4 km o más fueron más rápidas que tu ritmo suave. Si no eran sesiones de calidad, conviene ir más despacio.</p>
+        <p class="me-note">Son una estimación: si tu forma actual es peor que cuando hiciste esa marca, los ritmos rápidos te quedarán exigentes. Los rodajes suaves deberían sentirse cómodos, con la respiración controlada.</p>
+      </div>
+      <div class="me-card" id="ritmo">
+        <div><h2 class="me-h2">Ritmo medio de cada carrera</h2><p class="me-sub">Más arriba es más rápido · el tamaño del punto es la distancia</p></div>
+        <div class="me-chart" data-draw="chart-pace" data-source="activities"></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="records">
+      <div><h2 class="me-h2">Récords de carrera por año</h2><p class="me-sub">Tu mejor tiempo de cada año y el de siempre, según Strava</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="records_pivot" data-row-key="prueba">
+          <thead><tr><th data-field="prueba">Distancia</th><th data-field="y0" class="me-num" data-draw="rp-y0">—</th><th data-field="y1" class="me-num" data-draw="rp-y1">—</th><th data-field="y2" class="me-num" data-draw="rp-y2">—</th><th data-field="y3" class="me-num" data-draw="rp-y3">—</th><th data-field="siempre" class="me-num">Mejor de siempre</th></tr></thead>
+          <tbody data-draw="records-pivot"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="me-card" id="fondos">
+      <div><h2 class="me-h2">Tus salidas largas</h2><p class="me-sub">Carreras de 12 km o más, de la más reciente a la más antigua</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="fondos" data-row-key="id">
+          <thead><tr><th data-field="day">Fecha</th><th data-field="name">Actividad</th><th data-field="distance_km" class="me-num">Km</th><th data-field="pace" class="me-num">Ritmo</th><th data-field="fc_media" class="me-num">FC media</th><th data-field="elevation_m" class="me-num">Desnivel</th><th data-field="relative_effort" class="me-num">Esfuerzo</th></tr></thead>
+          <tbody data-draw="fondos"></tbody>
+        </table>
+      </div>
+      <p class="me-note">Para comparar, fíjate en ritmo y FC juntos: el mismo ritmo con menos FC indica mejor forma. Strava no registró el clima de estas actividades, así que el calor no aparece aquí.</p>
+    </div>
+
+    <div class="me-card" id="potencia">
+      <div><h2 class="me-h2">Potencia en bici</h2><p class="me-sub">Tu mejor potencia media en cada duración, por año (bici real y virtual)</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="potencia" data-row-key="esfuerzo">
+          <thead><tr><th data-field="esfuerzo">Duración</th><th data-field="y0" class="me-num" data-draw="p-y0">—</th><th data-field="y1" class="me-num" data-draw="p-y1">—</th><th data-field="y2" class="me-num" data-draw="p-y2">—</th><th data-field="y3" class="me-num" data-draw="p-y3">—</th></tr></thead>
+          <tbody data-draw="potencia"></tbody>
+        </table>
+      </div>
+      <div class="me-stats">
+        <div class="me-stat"><span class="me-stat-l">FTP estimado por ti</span><span class="me-stat-v"><span data-draw="f-20" data-source="ftp" data-field="ftp_20min" data-row="0">—</span><span class="me-kpi-unit">W</span></span><span class="me-kpi-sub">95 % de tu mejor 20 min de <span data-draw="f-anio" data-source="ftp" data-field="anio" data-row="0">—</span></span></div>
+        <div class="me-stat"><span class="me-stat-l">FTP en Strava</span><span class="me-stat-v"><span data-draw="f-strava" data-source="ftp" data-field="ftp_strava" data-row="0">—</span><span class="me-kpi-unit">W</span></span><span class="me-kpi-sub" data-draw="f-strava-src">—</span></div>
+      </div>
+      <p class="me-note">Si los dos FTP difieren mucho, actualiza el de Strava para que tus zonas de potencia y el Esfuerzo relativo en bici sean correctos.</p>
+    </div>
+  </section>
+
+  <!-- ==================== ÚLTIMO ENTRENAMIENTO ==================== -->
+  <section class="me-panel" id="sesion" role="tabpanel" hidden>
+    <div class="me-card" id="sesion-cabecera">
+      <div class="me-calbar">
+        <div class="me-sesion-tit">
+          <h2 class="me-month" data-draw="s-name" data-source="activities">—</h2>
+          <p class="me-sub" data-draw="s-when">—</p>
+        </div>
+        <label class="me-sub me-pick">Elegir otro entrenamiento
+          <select class="dash-select" id="s-select" data-draw="s-select" data-source="activities" aria-label="Elegir entrenamiento"></select>
+        </label>
+      </div>
+      <div class="me-stats" data-draw="s-stats" data-source="activities sesion"></div>
+    </div>
+
+    <div class="me-card" id="sesion-lectura">
+      <div><h2 class="me-h2">Lectura del entrenamiento</h2><p class="me-sub">Comparado con tus sesiones recientes del mismo deporte</p></div>
+      <ul class="me-reads" data-draw="s-lectura" data-source="sesion_lectura"></ul>
+    </div>
+
+    <div class="me-card" id="sesion-curva">
+      <div><h2 class="me-h2">Frecuencia cardíaca y velocidad durante la sesión</h2><p class="me-sub">Al correr se muestra el ritmo; más arriba es más rápido</p></div>
+      <div class="me-legend"><span><i class="me-dot" data-series="0"></i>Frecuencia cardíaca</span><span><i class="me-dot" data-series="1"></i><span data-draw="s-curve-label">—</span></span></div>
+      <div class="me-chart" data-draw="chart-s-curve" data-source="sesion_curva"></div>
+    </div>
+
+    <div class="me-grid2">
+      <div class="me-card" id="sesion-vueltas">
+        <div><h2 class="me-h2">FC media por vuelta</h2><p class="me-sub">El ancho de cada barra es la duración de la vuelta y el color, su zona</p></div>
+        <div class="me-chart" data-draw="chart-s-laps" data-source="sesion_vueltas"></div>
+      </div>
+      <div class="me-card" id="sesion-zonas">
+        <div><h2 class="me-h2">Tiempo en cada zona de FC</h2><p class="me-sub">Con tu FC máxima de 204 lpm</p></div>
+        <div class="me-chart" data-draw="chart-s-zones" data-source="sesion_zonas"></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="sesion-tabla">
+      <div><h2 class="me-h2">Vueltas</h2><p class="me-sub">Tal como las registró el reloj o la app</p></div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="sesion_vueltas" data-row-key="vuelta">
+          <thead><tr><th data-field="vuelta" class="me-num">#</th><th data-field="distancia_km" class="me-num">Km</th><th data-field="tiempo" class="me-num">Tiempo</th><th data-field="ritmo" class="me-num">Ritmo</th><th data-field="vel_kmh" class="me-num">Km/h</th><th data-field="fc_media" class="me-num">FC media</th><th data-field="fc_max" class="me-num">FC máx.</th><th data-field="vatios" class="me-num">Vatios</th><th data-field="desnivel_m" class="me-num">Desnivel</th></tr></thead>
+          <tbody data-draw="s-laps-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="me-card" id="comparar">
+      <div class="me-calbar">
+        <div><h2 class="me-h2">Comparar con otro entrenamiento</h2><p class="me-sub">Por defecto, tu sesión anterior del mismo deporte</p></div>
+        <label class="me-sub me-pick">Comparar con
+          <select class="dash-select" id="c-select" data-draw="c-select" data-source="activities" aria-label="Entrenamiento para comparar"></select>
+        </label>
+      </div>
+      <div class="me-tablewrap">
+        <table class="me-table" data-source="comparacion" data-row-key="metrica">
+          <thead><tr><th data-field="metrica">Dato</th><th data-field="a" class="me-num">Esta sesión</th><th data-field="b" class="me-num">Comparada</th><th data-field="dif" class="me-num">Diferencia</th></tr></thead>
+          <tbody data-draw="c-table"></tbody>
+        </table>
+      </div>
+      <div class="me-legend"><span><i class="me-dot" data-series="0"></i>Esta sesión</span><span><i class="me-dot" data-series="1"></i>Comparada</span></div>
+      <div class="me-grid2">
+        <div><h3 class="me-formtitle">Frecuencia cardíaca</h3><div class="me-chart" data-draw="chart-c-hr" data-source="sesion_curva comp_curva"></div></div>
+        <div><h3 class="me-formtitle" data-draw="c-speed-title">—</h3><div class="me-chart" data-draw="chart-c-speed" data-source="sesion_curva comp_curva"></div></div>
+      </div>
+    </div>
+
+    <div class="me-card" id="sesion-marcas">
+      <div><h2 class="me-h2">Mejores esfuerzos de esta sesión</h2><p class="me-sub">Tus tiempos o vatios más altos dentro de este entrenamiento</p></div>
+      <p class="me-empty" id="s-marcas-empty" hidden>Strava no registró mejores esfuerzos en esta sesión.</p>
+      <div class="me-row" data-draw="s-marcas" data-source="sesion_marcas"></div>
+    </div>
+  </section>
+
+  <!-- ==================== DETALLE ==================== -->
+  <section class="me-panel" id="detalle" role="tabpanel" hidden>
+    <div class="me-card" id="carga">
+      <div><h2 class="me-h2">Carga de entrenamiento</h2><p class="me-sub">Últimos 120 días · basada en el Esfuerzo relativo de Strava</p></div>
+      <div class="me-legend"><span><i class="me-dot" data-series="0"></i>Aguda (7 días)</span><span><i class="me-dot" data-series="1"></i>Crónica (42 días)</span></div>
+      <div class="me-chart" data-draw="chart-load" data-source="carga"></div>
+      <p class="me-note" id="carga-nota">La <b>carga aguda</b> es el esfuerzo de la última semana y la <b>crónica</b> el de las últimas seis, ambas como medias ponderadas. Si la aguda supera en más de un 30 % a la crónica (cociente mayor que 1,3), estás subiendo rápido; por encima de 1,5 el riesgo de lesión aumenta. Por debajo de 0,8 estás descargando.</p>
+    </div>
+
+    <div class="me-card" id="zonas">
+      <div><h2 class="me-h2">Tiempo en zonas de frecuencia cardíaca al correr</h2><p class="me-sub">Últimas 6 semanas · cada vuelta de 1 km se asigna a la zona de su FC media</p></div>
+      <p class="me-lede" data-read lang="es">En las últimas 4 semanas corriste <b data-draw="z-suave" data-source="zonas_resumen" data-field="pct_suave" data-row="0">—</b>% del tiempo en zonas 1–2, <b data-draw="z-medio" data-source="zonas_resumen" data-field="pct_moderado" data-row="0">—</b>% en zona 3 y <b data-draw="z-alto" data-source="zonas_resumen" data-field="pct_intenso" data-row="0">—</b>% en zonas 4–5.</p>
+      <div class="me-legend"><span><i class="me-dot" data-zone="0"></i>Z1</span><span><i class="me-dot" data-zone="1"></i>Z2</span><span><i class="me-dot" data-zone="2"></i>Z3</span><span><i class="me-dot" data-zone="3"></i>Z4</span><span><i class="me-dot" data-zone="4"></i>Z5</span></div>
+      <div class="me-chart" data-draw="chart-zones" data-source="zonas_semana"></div>
+      <p class="me-note">Zonas calculadas con tu FC máxima de <b>204 lpm</b> (la más alta registrada, en tu media maratón del 15 de noviembre): zona 2 desde <span data-draw="z2min" data-source="zonas_fc" data-field="min" data-where="zona=Z2">—</span> lpm y zona 5 desde <span data-draw="z5min" data-source="zonas_fc" data-field="min" data-where="zona=Z5">—</span> lpm. Strava todavía usa zonas estimadas por edad; cambia tu FC máxima allí (Ajustes → Zonas de rendimiento) para que también lo use en la app. Lo habitual en un plan de fondo es correr cerca del 80 % del tiempo en zonas 1–2.</p>
+    </div>
+
+    <div class="me-card" id="deportes">
+      <div><h2 class="me-h2">Reparto por deporte</h2><p class="me-sub">Últimos 90 días · horas y sesiones</p></div>
+      <div class="me-chart" data-draw="chart-sports" data-source="deportes90"></div>
+    </div>
+  </section>
+</div>
