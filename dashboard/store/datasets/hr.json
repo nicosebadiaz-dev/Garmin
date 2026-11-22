@@ -1,5 +1,5 @@
 {
-  "description": "Frecuencia cardíaca media de cada vuelta de tus carreras recientes de 4 km o más (hasta 25), pedida a Strava carrera por carrera.",
+  "description": "Frecuencia cardíaca de cada vuelta de tus 5 carreras más recientes de cada tipo (cortas, medias y largas), pedida a Strava carrera por carrera.",
   "source": {
     "args": {
       "first": 100,

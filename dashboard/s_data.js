@@ -48,10 +48,17 @@ dash.loader('activities', {
 });
 
 dash.loader('hr', {
-  description: 'De las 100 actividades más recientes toma las carreras de 4 km o más (hasta 25), pide a Strava el detalle de cada una y devuelve una fila por vuelta con su FC media y la FC media de la carrera.',
+  description: 'De las 100 actividades más recientes toma las 5 carreras más recientes de cada tipo (cortas: 4–8 km, medias: 8–14 km, largas: 14 km o más), pide a Strava el detalle de cada una (15 como máximo) y devuelve una fila por vuelta con su FC media y la FC media de la carrera.',
   fn: async ({ answer, call }) => {
     if (!answer || answer.error) throw new Error((answer && (answer.error.message || answer.error)) || 'Strava no devolvió actividades');
-    const pick = (answer.activities || []).filter((a) => ['Run', 'TrailRun'].includes(a.sport_type) && ((a.summary && a.summary.distance) || 0) >= 4).slice(0, 25);
+    const tipoDe = (km) => (km >= 14 ? 'Larga' : km >= 8 ? 'Media' : km >= 4 ? 'Corta' : null);
+    const cupo = { Corta: 5, Media: 5, Larga: 5 };
+    const pick = [];
+    for (const a of answer.activities || []) {
+      if (!['Run', 'TrailRun'].includes(a.sport_type)) continue;
+      const tipo = tipoDe((a.summary && a.summary.distance) || 0);
+      if (tipo && cupo[tipo] > 0) { cupo[tipo]--; pick.push({ ...a, tipo }); }
+    }
     const rows = [];
     let next = 0;
     const worker = async () => {
@@ -62,13 +69,13 @@ dash.loader('hr', {
         if (!p || p.error || !p.has_heartrate) continue;
         (p.laps || []).forEach((l, k) => {
           if (l.avg_hr == null) return;
-          rows.push({ activity_id: String(a.id), day: (a.start_local || '').slice(0, 10), lap: k + 1, lap_s: l.moving_time || 0, lap_hr: Math.round(l.avg_hr), run_avg_hr: p.average_heartrate != null ? Math.round(p.average_heartrate) : null });
+          rows.push({ activity_id: String(a.id), day: (a.start_local || '').slice(0, 10), tipo: a.tipo, lap: k + 1, lap_s: l.moving_time || 0, lap_hr: Math.round(l.avg_hr), run_avg_hr: p.average_heartrate != null ? Math.round(p.average_heartrate) : null });
         });
       }
     };
     await Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
     rows.sort((x, y) => (y.day.localeCompare(x.day)) || (x.activity_id.localeCompare(y.activity_id)) || (x.lap - y.lap));
-    return { rows, columns: ['activity_id', 'day', 'lap', 'lap_s', 'lap_hr', 'run_avg_hr'] };
+    return { rows, columns: ['activity_id', 'day', 'tipo', 'lap', 'lap_s', 'lap_hr', 'run_avg_hr'] };
   }
 });
 
